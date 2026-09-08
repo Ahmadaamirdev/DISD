@@ -1,0 +1,149 @@
+@import "tailwindcss";
+
+:root {
+  /* Brand Colors */
+  --disd-teal-primary: #004444;
+  --disd-teal-dark: #002D2D;
+  --disd-teal-light: #005F5F;
+  --disd-teal-soft: #F0F7F7;
+
+  --disd-amber-primary: #FF9900;
+  --disd-amber-hover: #E68A00;
+  --disd-amber-light: #FFF8EE;
+
+  --disd-blue-primary: #005AB5;
+  --disd-green-accent: #16AB64;
+
+  /* Neutrals */
+  --bg-white: #FFFFFF;
+  --bg-light-gray: #F8FAFC;
+  --bg-slate-gray: #F1F5F9;
+  --border-color: #E2E8F0;
+  --border-color-dark: #CBD5E1;
+
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #64748B;
+
+  /* Typography Variables */
+  --font-sans: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-heading: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+/* Global Reset & Box Sizing */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-padding-top: 84px;
+  color-scheme: light;
+  font-size: 16px;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: var(--bg-white);
+  color: var(--text-primary);
+  line-height: 1.65;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Spacious Container Setup */
+.container-custom {
+  width: 100%;
+  max-width: 1240px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 2rem;
+  padding-right: 2rem;
+}
+
+@media (max-width: 640px) {
+  .container-custom {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+}
+
+/* Section Spacing */
+.section-spacious {
+  padding-top: 6rem;
+  padding-bottom: 6rem;
+}
+
+@media (min-width: 1024px) {
+  .section-spacious {
+    padding-top: 7rem;
+    padding-bottom: 7rem;
+  }
+}
+
+/* Section Header Typography & Spacing */
+.section-header-spacious {
+  text-align: center;
+  max-width: 860px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 4rem;
+}
+
+.section-title-large {
+  font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: clamp(2rem, 3.2vw, 2.75rem);
+  font-weight: 800;
+  color: var(--disd-teal-primary);
+  line-height: 1.2;
+  margin-bottom: 1.25rem;
+  letter-spacing: -0.02em;
+}
+
+.section-accent-line {
+  width: 70px;
+  height: 4px;
+  background-color: var(--disd-amber-primary);
+  margin: 1.25rem auto 1.5rem auto;
+  border-radius: 2px;
+}
+
+.section-subtitle-spacious {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  line-height: 1.8;
+  max-width: 780px;
+  margin: 0 auto;
+}
+
+/* Corporate Card Utilities */
+.spacious-card {
+  background-color: #FFFFFF;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.spacious-card:hover {
+  border-color: rgba(0, 68, 68, 0.35);
+  box-shadow: 0 16px 32px -4px rgba(0, 0, 0, 0.08);
+  transform: translateY(-4px);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #F1F5F9;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--disd-teal-primary);
+  border-radius: 5px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--disd-amber-primary);
+}

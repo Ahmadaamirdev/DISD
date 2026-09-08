@@ -1,0 +1,195 @@
+[
+  {
+    "id": "prod-1",
+    "title": "Triangular Hydraulic Breaker (Heavy Series)",
+    "slug": "triangular-hydraulic-breaker",
+    "category": "Hydraulic Breaker",
+    "modelNumber": "DISD-TB210",
+    "image": "https://res.cloudinary.com/nol4eyyl/image/upload/v1788845112/disd_assets/2025620852505638.jpg",
+    "thumbnail": "https://res.cloudinary.com/nol4eyyl/image/upload/v1788845101/disd_assets/01.png",
+    "description": "Engineered under Japanese Komatsu KES standards with high-alloy forged steel chisel. Delivers maximum impact energy with low hydraulic recoil for quarrying, tunneling, and reinforced concrete demolition.",
+    "specifications": {
+      "operatingWeight": "1,850 kg - 3,200 kg",
+      "applicableExcavator": "20 - 32 Ton",
+      "operatingPressure": "160 - 180 bar",
+      "oilFlowRate": "150 - 190 L/min",
+      "impactRate": "350 - 650 bpm",
+      "chiselDiameter": "140 mm",
+      "standardWarranty": "24 Months Structural / 12 Months Core Hydraulic",
+      "manufacturingStandard": "6S Lean / Japan Komatsu KES / CE & ISO Certified"
+    },
+    "features": [
+      "Anti-blank firing auto-cushion system",
+      "Optimized nitrogen gas chamber for 25% higher kinetic impact",
+      "Wear-resistant Hardox side plates for extreme desert/quarry conditions",
+      "Full compatibility with CAT, Komatsu, Volvo, Hyundai, and Sany excavators"
+    ],
+    "applications": [
+      "Quarry Mining",
+      "Highway Trenching",
+      "Heavy Foundation Demolition",
+      "Rock Breaking"
+    ],
+    "featured": true
+  },
+  {
+    "id": "prod-2",
+    "title": "Heavy-Duty All-Terrain Forklift",
+    "slug": "all-terrain-forklift",
+    "category": "Forklift",
+    "modelNumber": "DISD-FL500-4WD",
+    "image": "https://res.cloudinary.com/nol4eyyl/image/upload/v1788845110/disd_assets/2025572057496639.jpg",
+    "thumbnail": "https://res.cloudinary.com/nol4eyyl/image/upload/v1788845103/disd_assets/02.png",
+    "description": "Four-wheel-drive rough terrain forklift engineered for harsh construction sites, desert logistics, and uneven industrial yards with high ground clearance and reinforced mast.",
+    "specifications": {
+      "operatingWeight": "6,800 kg",
+      "applicableExcavator": "N/A (Self-Propelled 4WD)",
+      "operatingPressure": "210 bar",
+      "oilFlowRate": "85 L/min",
+      "impactRate": "N/A",
+      "chiselDiameter": "N/A",
+      "standardWarranty": "18 Months / 2,000 Operating Hours",
+      "manufacturingStandard": "ISO 9001 / CE Certified / 6S Lean"
+    },
+    "features": [
+      "Differential lock for sandy and muddy terrain mobility",
+      "Panoramic safety ROPS/FOPS certified operator cabin",
+      "Heavy-duty pneumatic off-road traction tires",
+      "Integrated side-shifter and hydraulic fork positioner"
+    ],
+    "applications": [
+      "Desert Logistics",
+      "Construction Yard Handling",
+      "Quarry Supply Transport"
+    ],
+    "featured": true
+  },
+  {
+    "id": "prod-3",
+    "title": "High-Frequency Vibrating Compactor",
+    "slug": "vibrating-compactor",
+    "category": "Compaction Equipment",
+    "modelNumber": "DISD-VC80",
+    "image": "https://res.cloudinary.com/nol4eyyl/image/upload/v1788845106/disd_assets/2025571908367950.jpg",
+    "thumbnail": "https://res.cloudinary.com/nol4eyyl/image/upload/v1788845105/disd_assets/03.png",
+    "description": "Excavator-mounted vibrating compactor plate built for trench backfill, embankment consolidation, and roadbed preparation with vibration dampening technology.",
+    "specifications": {
+      "operatingWeight": "920 kg",
+      "applicableExcavator": "12 - 20 Ton",
+      "operatingPressure": "140 - 160 bar",
+      "oilFlowRate": "80 - 110 L/min",
+      "impactRate": "2,000 - 2,400 vpm",
+      "chiselDiameter": "N/A (Plate 1,100 x 800 mm)",
+      "standardWarranty": "12 Months Comprehensive",
+      "manufacturingStandard": "Japan Komatsu KES Standard"
+    },
+    "features": [
+      "High-grade Swedish rubber shock absorbers protect excavator boom",
+      "Dual eccentric rotating shafts for uniform depth compaction",
+      "Continuous duty heavy-duty hydraulic motor",
+      "Universal quick-coupler adapter head"
+    ],
+    "applications": [
+      "Pipe Trench Backfill",
+      "Road Foundation Compaction",
+      "Slope Stabilization"
+    ],
+    "featured": true
+  },
+  {
+    "id": "prod-4",
+    "title": "Heavy Crawler Hydraulic Excavator",
+    "slug": "crawler-hydraulic-excavator",
+    "category": "Excavator",
+    "modelNumber": "DISD-EX360HD",
+    "image": "https://res.cloudinary.com/nol4eyyl/image/upload/v1788845109/disd_assets/2025572005225896.jpg",
+    "thumbnail": "https://res.cloudinary.com/nol4eyyl/image/upload/v1788845106/disd_assets/04.png",
+    "description": "High-efficiency 36-ton class hydraulic crawler excavator tailored for Middle Eastern high-temperature environments with tropicalized cooling radiators and heavy rock boom.",
+    "specifications": {
+      "operatingWeight": "35,800 kg",
+      "applicableExcavator": "Primary Machine",
+      "operatingPressure": "343 bar",
+      "oilFlowRate": "2 x 290 L/min",
+      "impactRate": "N/A (Bucket Digging Force: 235 kN)",
+      "chiselDiameter": "N/A",
+      "standardWarranty": "24 Months / 3,000 Operating Hours",
+      "manufacturingStandard": "6S Lean / ISO 14001 / CE Certified"
+    },
+    "features": [
+      "Heavy-duty tropical cooling system rated for 55°C ambient desert heat",
+      "Positive flow hydraulic management for instant boom responsiveness",
+      "Reinforced X-frame undercarriage and forged track links",
+      "Pre-piped dual hydraulic auxiliary circuits for breakers and grapples"
+    ],
+    "applications": [
+      "Open Pit Mining",
+      "Mass Earthmoving",
+      "Infrastructure Construction"
+    ],
+    "featured": true
+  },
+  {
+    "id": "prod-5",
+    "title": "Industrial Hydraulic Wood & Stone Grapple",
+    "slug": "hydraulic-grapple",
+    "category": "Attachments",
+    "modelNumber": "DISD-WG360",
+    "image": "https://res.cloudinary.com/nol4eyyl/image/upload/v1788845108/disd_assets/2025571927321350.jpg",
+    "thumbnail": "https://res.cloudinary.com/nol4eyyl/image/upload/v1788845101/disd_assets/01.png",
+    "description": "360-degree continuous rotation hydraulic grapple featuring dual cylinders with integrated counter-balance valves for rock handling, timber handling, and scrap demolition.",
+    "specifications": {
+      "operatingWeight": "1,450 kg",
+      "applicableExcavator": "18 - 26 Ton",
+      "operatingPressure": "180 - 210 bar",
+      "oilFlowRate": "100 - 130 L/min",
+      "impactRate": "N/A (Clamping Force: 115 kN)",
+      "chiselDiameter": "Jaw Opening: 1,950 mm",
+      "standardWarranty": "12 Months Mechanical / Hydraulic",
+      "manufacturingStandard": "6S Lean / Komatsu KES Compatible"
+    },
+    "features": [
+      "Hardox 500 reinforced tine tips for maximum abrasion resistance",
+      "Heavy-duty slewing bearing with sealed planetary drive",
+      "Enclosed hydraulic cylinders to prevent rock impact damage",
+      "Bi-directional pressure relief valving"
+    ],
+    "applications": [
+      "Riprap Rock Placement",
+      "Scrap Metal Sorting",
+      "Demolition Clearing"
+    ],
+    "featured": false
+  },
+  {
+    "id": "prod-6",
+    "title": "Rough-Terrain Scissor Lift & Lifting Slings",
+    "slug": "lifting-slings-scissor-lift",
+    "category": "Scissor Lift",
+    "modelNumber": "DISD-SL1400",
+    "image": "https://res.cloudinary.com/nol4eyyl/image/upload/v1788845111/disd_assets/2025572138453362.jpg",
+    "thumbnail": "https://res.cloudinary.com/nol4eyyl/image/upload/v1788845103/disd_assets/02.png",
+    "description": "High-reach aerial work platform and certified lifting equipment engineered for refinery maintenance, steel structure erection, and industrial plant servicing.",
+    "specifications": {
+      "operatingWeight": "4,200 kg",
+      "applicableExcavator": "Independent Mobile Platform",
+      "operatingPressure": "175 bar",
+      "oilFlowRate": "45 L/min",
+      "impactRate": "Working Height: Up to 16 Meters",
+      "chiselDiameter": "Platform Capacity: 450 kg",
+      "standardWarranty": "18 Months Structural & Electrical",
+      "manufacturingStandard": "EN280 / CE / ISO 9001"
+    },
+    "features": [
+      "Automatic pothole protection and slope tilt alarm",
+      "High ground clearance with self-leveling hydraulic outriggers",
+      "Zero-emission electric / diesel hybrid powertrain options",
+      "Auxiliary manual emergency platform lowering system"
+    ],
+    "applications": [
+      "Refinery Maintenance",
+      "Commercial Facade Installation",
+      "Industrial Warehousing"
+    ],
+    "featured": false
+  }
+]

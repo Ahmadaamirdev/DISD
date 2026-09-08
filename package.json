@@ -1,0 +1,18 @@
+{
+  "name": "disd-mern-platform",
+  "version": "1.0.0",
+  "description": "Dragon International Services and Development LLC - Enterprise Landing Platform",
+  "scripts": {
+    "install-all": "npm install && cd frontend && npm install && cd ../backend && npm install",
+    "frontend": "cd frontend && npm run dev",
+    "backend": "cd backend && npm run dev",
+    "dev": "concurrently \"npm run backend\" \"npm run frontend\"",
+    "build": "cd frontend && npm run build"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "dependencies": {
+    "cloudinary": "^2.11.0"
+  }
+}
