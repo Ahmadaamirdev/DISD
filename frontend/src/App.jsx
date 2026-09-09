@@ -10,9 +10,6 @@ import Footer from './components/Footer.jsx';
 import SectionDivider from './components/SectionDivider.jsx';
 import SitePreloader from './components/SitePreloader.jsx';
 
-import './styles/index.css';
-import './styles/app.css';
-
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);

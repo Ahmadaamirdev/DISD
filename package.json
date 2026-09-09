@@ -1,18 +1,22 @@
 {
   "name": "disd-mern-platform",
   "version": "1.0.0",
-  "description": "Dragon International Services and Development LLC - Enterprise Landing Platform",
+  "private": true,
+  "description": "Dragon International Services and Development LLC - Enterprise Machinery Platform",
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
   "scripts": {
-    "install-all": "npm install && cd frontend && npm install && cd ../backend && npm install",
-    "frontend": "cd frontend && npm run dev",
-    "backend": "cd backend && npm run dev",
-    "dev": "concurrently \"npm run backend\" \"npm run frontend\"",
-    "build": "cd frontend && npm run build"
+    "dev": "concurrently -n \"BACKEND,FRONTEND\" -c \"cyan,magenta\" \"npm run dev --workspace=backend\" \"npm run dev --workspace=frontend\"",
+    "frontend": "npm run dev --workspace=frontend",
+    "backend": "npm run dev --workspace=backend",
+    "build": "npm run build --workspace=frontend",
+    "start": "npm run start --workspace=backend",
+    "upload-assets": "node scripts/upload_to_cloudinary.cjs"
   },
   "devDependencies": {
+    "cloudinary": "^2.11.0",
     "concurrently": "^9.1.2"
-  },
-  "dependencies": {
-    "cloudinary": "^2.11.0"
   }
 }
