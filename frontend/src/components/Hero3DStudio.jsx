@@ -562,12 +562,20 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
     updateCardPositionsRef.current = updateCardPositions;
 
     // 9. Resize Handling
+    let lastW = 0;
+    let lastH = 0;
     const handleResize = () => {
       const width = getWidth();
       const height = getHeight();
+      if (!width || !height || (width === lastW && height === lastH)) return;
+      lastW = width;
+      lastH = height;
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
       renderer.setSize(width, height, false);
+      try {
+        renderer.render(scene, camera);
+      } catch (e) {}
       updateCardPositions();
     };
 

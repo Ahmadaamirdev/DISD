@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { initialProducts, equipmentCategories } from '../data/productsData.js';
 import ProductDetailModal from './ProductDetailModal.jsx';
 import { ArrowUpRight, ChevronRight } from 'lucide-react';
@@ -6,38 +6,50 @@ import ScrollReveal from './ScrollReveal.jsx';
 import { getAssetUrl } from '../data/cloudinaryAssets.js';
 
 export default function ProductCatalog({ selectedCategory: propCategory, onSelectForQuote }) {
-  const [products, setProducts] = useState(initialProducts);
+  const [allProducts, setAllProducts] = useState(initialProducts);
   const [selectedCategory, setSelectedCategory] = useState(propCategory || 'All');
   const [activeModalProduct, setActiveModalProduct] = useState(null);
 
+  // Sync with parent prop if navigation triggers category change
   useEffect(() => {
-    if (propCategory) {
+    if (propCategory && propCategory !== selectedCategory) {
       setSelectedCategory(propCategory);
     }
   }, [propCategory]);
 
+  // Single-flight background pre-fetch: caches all products once on mount
   useEffect(() => {
-    const fetchProducts = async () => {
+    let isMounted = true;
+    const fetchAllProducts = async () => {
       try {
-        const query = selectedCategory !== 'All' ? `?category=${encodeURIComponent(selectedCategory)}` : '';
-        const res = await fetch(`/api/products${query}`);
+        const res = await fetch('/api/products');
         if (res.ok) {
           const data = await res.json();
-          if (data && data.data && data.data.length > 0) {
-            setProducts(data.data);
+          if (isMounted && data?.data?.length > 0) {
+            setAllProducts(data.data);
           }
         }
       } catch (err) {
-        console.log('Using initial products data:', err.message);
+        // Fallback gracefully to bundled initialProducts
       }
     };
 
-    fetchProducts();
-  }, [selectedCategory]);
+    fetchAllProducts();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
-  const filteredProducts = selectedCategory === 'All'
-    ? products
-    : products.filter(p => p.category.toLowerCase() === selectedCategory.toLowerCase());
+  // Instantaneous 0ms in-memory filtering
+  const filteredProducts = useMemo(() => {
+    if (selectedCategory === 'All') return allProducts;
+    const target = selectedCategory.toLowerCase();
+    return allProducts.filter(p => p.category && p.category.toLowerCase() === target);
+  }, [allProducts, selectedCategory]);
+
+  const handleCategorySelect = useCallback((cat) => {
+    setSelectedCategory(cat);
+  }, []);
 
   return (
     <section id="products" className="disd-section" style={{ backgroundColor: '#FFFFFF', borderBottom: '1px solid #E2E8F0' }}>
@@ -58,51 +70,63 @@ export default function ProductCatalog({ selectedCategory: propCategory, onSelec
         </ScrollReveal>
 
         {/* Category Filter Tabs */}
-        <ScrollReveal animation="fade-up" delay={80}>
+        <ScrollReveal animation="fade-up" delay={60}>
           <div className="disd-filter-tabs">
-            {equipmentCategories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`disd-tab-btn ${selectedCategory === cat ? 'active' : ''}`}
-              >
-                {cat}
-              </button>
-            ))}
+            {equipmentCategories.map((cat) => {
+              const isActive = selectedCategory === cat;
+              return (
+                <button
+                  key={cat}
+                  onClick={() => handleCategorySelect(cat)}
+                  className={`disd-tab-btn ${isActive ? 'active' : ''}`}
+                  type="button"
+                >
+                  {cat}
+                </button>
+              );
+            })}
           </div>
         </ScrollReveal>
 
-        {/* Products Grid */}
-        <ScrollReveal animation="fade-up" stagger={true} delay={120}>
-          <div className="disd-products-grid">
-            {filteredProducts.map((prod) => {
-              const cardId = prod.id || prod.slug;
+        {/* Products Grid - Keyed by category for buttery-smooth transition */}
+        <div 
+          key={selectedCategory}
+          className="disd-products-grid disd-products-fade-in"
+        >
+          {filteredProducts.map((prod, idx) => {
+            const cardId = prod.id || prod.slug || idx;
+            const isHighPriority = idx < 3;
 
-              return (
-                <div 
-                  key={cardId} 
-                  className="disd-product-card"
-                >
-                  <div>
-                    {/* Photo Viewport */}
-                    <div className="disd-prod-img-wrap">
-                      <img
-                        src={getAssetUrl(prod.image)}
-                        alt={prod.title}
-                        className="disd-prod-img"
-                      />
+            return (
+              <div 
+                key={cardId} 
+                className="disd-product-card"
+              >
+                <div>
+                  {/* Photo Viewport */}
+                  <div className="disd-prod-img-wrap">
+                    <img
+                      src={getAssetUrl(prod.image)}
+                      alt={prod.title}
+                      className="disd-prod-img"
+                      loading={isHighPriority ? 'eager' : 'lazy'}
+                      decoding="async"
+                      fetchPriority={isHighPriority ? 'high' : 'auto'}
+                      width="320"
+                      height="240"
+                    />
 
-                      <span className="disd-model-badge">
-                        {prod.modelNumber}
-                      </span>
-                    </div>
+                    <span className="disd-model-badge">
+                      {prod.modelNumber}
+                    </span>
+                  </div>
 
-                    {/* Title Strip (#ECECEC) */}
-                    <div className="disd-prod-title-bar">
-                      <h3 className="disd-prod-title">
-                        {prod.title}
-                      </h3>
-                    </div>
+                  {/* Title Strip (#ECECEC) */}
+                  <div className="disd-prod-title-bar">
+                    <h3 className="disd-prod-title">
+                      {prod.title}
+                    </h3>
+                  </div>
 
                   {/* Card Body */}
                   <div className="disd-prod-body">
@@ -139,6 +163,7 @@ export default function ProductCatalog({ selectedCategory: propCategory, onSelec
                   <button
                     onClick={() => setActiveModalProduct(prod)}
                     className="disd-btn-sheet"
+                    type="button"
                   >
                     <span>Spec Sheet</span>
                     <ArrowUpRight size={14} />
@@ -147,16 +172,16 @@ export default function ProductCatalog({ selectedCategory: propCategory, onSelec
                   <button
                     onClick={() => onSelectForQuote(prod)}
                     className="disd-btn-quote"
+                    type="button"
                   >
                     <span>Get Quote</span>
                     <ChevronRight size={14} />
                   </button>
                 </div>
-                </div>
-              );
-            })}
-          </div>
-        </ScrollReveal>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* Technical Spec Sheet Modal */}

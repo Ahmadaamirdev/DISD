@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Users, Settings, ShieldCheck, ArrowRight } from 'lucide-react';
 import ScrollReveal from './ScrollReveal.jsx';
+import { getAssetUrl } from '../data/cloudinaryAssets';
 
 export default function EngineeringAdvantage() {
   const videoRef = useRef(null);
@@ -56,8 +57,8 @@ export default function EngineeringAdvantage() {
         muted
         playsInline
       >
-        <source src="https://res.cloudinary.com/nol4eyyl/video/upload/v1788845146/disd_assets/chisel_explode_video.mp4" type="video/mp4" />
-        <source src="/videos/hero_video.mp4" type="video/mp4" />
+        <source src={getAssetUrl('chisel_explode_video.mp4')} type="video/mp4" />
+        <source src={getAssetUrl('hero_video.mp4')} type="video/mp4" />
       </video>
 
       <div className="disd-container" style={{ position: 'relative', zIndex: 2 }}>

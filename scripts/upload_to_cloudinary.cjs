@@ -8,11 +8,12 @@ cloudinary.config({
 });
 
 const ASSETS_DIR = path.join(__dirname, '../frontend/public/assets');
-const OUTPUT_FILE = path.join(__dirname, '../frontend/src/data/cloudinaryAssets.json');
+const VIDEOS_DIR = path.join(__dirname, '../frontend/public/videos');
+const FRONTEND_OUTPUT = path.join(__dirname, '../frontend/src/data/cloudinaryAssets.json');
+const BACKEND_OUTPUT = path.join(__dirname, '../backend/data/cloudinaryAssets.json');
 const PRESET = 'yine2gxn';
 
-async function uploadFile(fileName) {
-  const filePath = path.join(ASSETS_DIR, fileName);
+async function uploadFile(filePath, fileName) {
   const ext = path.extname(fileName).toLowerCase();
 
   let resource_type = 'image';
@@ -39,21 +40,52 @@ async function uploadFile(fileName) {
   return result.secure_url;
 }
 
+function saveMap(map) {
+  const jsonContent = JSON.stringify(map, null, 2);
+  fs.writeFileSync(FRONTEND_OUTPUT, jsonContent, 'utf8');
+  
+  // Ensure backend data directory exists and sync mapping
+  const backendDir = path.dirname(BACKEND_OUTPUT);
+  if (!fs.existsSync(backendDir)) {
+    fs.mkdirSync(backendDir, { recursive: true });
+  }
+  fs.writeFileSync(BACKEND_OUTPUT, jsonContent, 'utf8');
+}
+
 async function run() {
-  const files = fs.readdirSync(ASSETS_DIR);
-  console.log(`Found ${files.length} assets to upload to Cloudinary.`);
+  const targetFiles = [];
+
+  if (fs.existsSync(ASSETS_DIR)) {
+    fs.readdirSync(ASSETS_DIR).forEach(f => {
+      const full = path.join(ASSETS_DIR, f);
+      if (fs.statSync(full).isFile()) {
+        targetFiles.push({ name: f, path: full });
+      }
+    });
+  }
+
+  if (fs.existsSync(VIDEOS_DIR)) {
+    fs.readdirSync(VIDEOS_DIR).forEach(f => {
+      const full = path.join(VIDEOS_DIR, f);
+      if (fs.statSync(full).isFile()) {
+        targetFiles.push({ name: f, path: full });
+      }
+    });
+  }
+
+  console.log(`Found ${targetFiles.length} total asset files across assets & videos.`);
 
   let map = {};
-  if (fs.existsSync(OUTPUT_FILE)) {
+  if (fs.existsSync(FRONTEND_OUTPUT)) {
     try {
-      map = JSON.parse(fs.readFileSync(OUTPUT_FILE, 'utf8'));
+      map = JSON.parse(fs.readFileSync(FRONTEND_OUTPUT, 'utf8'));
     } catch (e) {}
   }
 
-  for (let i = 0; i < files.length; i++) {
-    const file = files[i];
-    if (map[file]) {
-      console.log(`[${i + 1}/${files.length}] Skipping already uploaded: ${file}`);
+  for (let i = 0; i < targetFiles.length; i++) {
+    const { name, path: filePath } = targetFiles[i];
+    if (map[name]) {
+      console.log(`[${i + 1}/${targetFiles.length}] Skipping already uploaded: ${name}`);
       continue;
     }
 
@@ -61,24 +93,25 @@ async function run() {
     let retries = 3;
     while (!success && retries > 0) {
       try {
-        console.log(`[${i + 1}/${files.length}] Starting: ${file}`);
-        const url = await uploadFile(file);
-        map[file] = url;
-        fs.writeFileSync(OUTPUT_FILE, JSON.stringify(map, null, 2), 'utf8');
+        console.log(`[${i + 1}/${targetFiles.length}] Starting: ${name}`);
+        const url = await uploadFile(filePath, name);
+        map[name] = url;
+        saveMap(map);
         success = true;
       } catch (err) {
         retries--;
-        console.error(`Error uploading ${file}:`, err.message || err);
+        console.error(`Error uploading ${name}:`, err.message || err);
         if (retries > 0) {
           console.log(`Retrying in 3s (${retries} attempts left)...`);
           await new Promise(r => setTimeout(r, 3000));
         } else {
-          console.error(`FAILED permanently: ${file}`);
+          console.error(`FAILED permanently: ${name}`);
         }
       }
     }
   }
 
+  saveMap(map);
   console.log('\nAll uploads finished! Total assets in map:', Object.keys(map).length);
 }
 

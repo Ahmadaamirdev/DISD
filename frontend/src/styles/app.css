@@ -15,6 +15,7 @@
 html {
   scroll-behavior: smooth;
   font-size: 16px;
+  scrollbar-gutter: stable;
 }
 
 body {
@@ -642,34 +643,66 @@ textarea {
   margin: 0;
 }
 
-/* 5 Cards Grid: Horizontal Layout with 3D Perspective Hover */
+/* 5 Cards Grid: Modern Clean Layout with 3D Flip Card Reversal */
 .disd-products-five-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 20px;
   margin-bottom: 80px;
-  perspective: 1000px;
 }
 
+/* 3D Flip Card Container */
 .disd-cat-five-card {
-  background-color: #FFFFFF;
-  border: 1px solid #E2E8F0;
-  border-radius: 14px;
-  position: relative;
-  transform-style: preserve-3d;
-  will-change: transform;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
-  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease;
+  perspective: 1100px;
+  height: 385px;
+  background: transparent;
+  border: none;
+  padding: 0;
   cursor: pointer;
+  position: relative;
+}
+
+.disd-cat-five-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 14px;
+  transition: transform 0.65s cubic-bezier(0.2, 0.85, 0.25, 1);
+  transform-style: preserve-3d;
+}
+
+/* When hovered, card reverses (flips 180deg) */
+.disd-cat-five-card.is-flipped .disd-cat-five-card-inner {
+  transform: rotateY(180deg);
+}
+
+/* Front & Back Faces - strictly contained within card boundary */
+.disd-cat-five-card-front,
+.disd-cat-five-card-back {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 14px;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  overflow: hidden; /* strictly keeps content inside the card */
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 }
 
-.disd-cat-five-card:hover {
-  transform: translateZ(10px) rotateX(20deg) rotateY(20deg);
-  box-shadow: -12px 22px 40px rgba(0, 0, 0, 0.12), 0 10px 25px rgba(255, 153, 0, 0.18);
-  border-color: #FF9900;
+/* FRONT FACE */
+.disd-cat-five-card-front {
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.disd-cat-five-card:hover .disd-cat-five-card-front {
+  border-color: #CBD5E1;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
 }
 
 .disd-cat-five-img-wrap {
@@ -681,22 +714,19 @@ textarea {
   align-items: center;
   justify-content: center;
   padding: 18px;
-  transform-style: preserve-3d;
+  overflow: hidden;
 }
 
 .disd-cat-five-img {
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
-  transform-style: preserve-3d;
-  transform: translateZ(0);
-  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), filter 0.5s ease;
   filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.07));
+  transition: transform 0.4s ease;
 }
 
 .disd-cat-five-card:hover .disd-cat-five-img {
-  transform: translateZ(45px) scale(1.06);
-  filter: drop-shadow(0 14px 18px rgba(0, 0, 0, 0.16));
+  transform: scale(1.04);
 }
 
 .disd-cat-five-corner-cut {
@@ -709,7 +739,6 @@ textarea {
   flex-direction: column;
   flex-grow: 1;
   justify-content: space-between;
-  transform-style: preserve-3d;
 }
 
 .disd-cat-five-accent-dash {
@@ -722,13 +751,6 @@ textarea {
   color: #043927;
   margin-bottom: 8px;
   line-height: 1.3;
-  transform-style: preserve-3d;
-  transform: translateZ(0);
-  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), color 0.3s ease;
-}
-
-.disd-cat-five-card:hover .disd-cat-five-title {
-  transform: translateZ(50px);
 }
 
 .disd-cat-five-desc {
@@ -737,13 +759,6 @@ textarea {
   line-height: 1.55;
   margin-bottom: 22px;
   min-height: 40px;
-  transform-style: preserve-3d;
-  transform: translateZ(0);
-  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.disd-cat-five-card:hover .disd-cat-five-desc {
-  transform: translateZ(25px);
 }
 
 .disd-cat-five-action {
@@ -752,13 +767,6 @@ textarea {
   justify-content: space-between;
   padding-top: 14px;
   border-top: 1px solid #F1F5F9;
-  transform-style: preserve-3d;
-  transform: translateZ(0);
-  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.disd-cat-five-card:hover .disd-cat-five-action {
-  transform: translateZ(35px);
 }
 
 .disd-cat-five-learn {
@@ -770,6 +778,142 @@ textarea {
 
 .disd-cat-five-card:hover .disd-cat-five-learn {
   color: #FF9900;
+}
+
+/* BACK / REVERSED FACE */
+.disd-cat-five-card-back {
+  background: radial-gradient(circle at 50% 25%, #003636 0%, #001F1F 100%);
+  border: 1.5px solid #FF9900;
+  box-shadow: 0 16px 36px rgba(0, 43, 43, 0.35), 0 4px 18px rgba(255, 153, 0, 0.25);
+  transform: rotateY(180deg);
+  padding: 16px 16px 18px 16px;
+  color: #FFFFFF;
+}
+
+.disd-cat-five-back-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 6px;
+}
+
+.disd-cat-five-back-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: rgba(255, 153, 0, 0.15);
+  border: 1px solid rgba(255, 153, 0, 0.4);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #FFB347;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.disd-cat-five-back-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #FF9900;
+  box-shadow: 0 0 6px #FF9900;
+  animation: disdDotPulse 1.5s infinite;
+}
+
+@keyframes disdDotPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.75); }
+}
+
+.disd-cat-five-back-title {
+  font-size: 17px;
+  font-weight: 800;
+  color: #FFFFFF;
+  margin: 0;
+  line-height: 1.25;
+}
+
+.disd-cat-five-back-viewer-wrap {
+  position: relative;
+  width: 100%;
+  height: 220px;
+  overflow: hidden;
+  border-radius: 10px;
+  background: radial-gradient(circle at 50% 60%, rgba(255, 153, 0, 0.08) 0%, transparent 75%);
+}
+
+.disd-cat-five-back-action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.disd-cat-five-back-hint {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.75);
+  letter-spacing: 0.02em;
+}
+
+/* 3D Model Viewer Inside Reversed Card */
+.disd-card-3d-viewer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transform: scale(0.88);
+  pointer-events: none;
+  transition: opacity 0.15s ease 0s, transform 0.15s ease 0s;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Appears AFTER the card gets reversed (delay ~0.26s) */
+.disd-cat-five-card.is-flipped .disd-card-3d-viewer.active {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 0.4s ease 0.26s, transform 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.26s;
+}
+
+.disd-card-3d-canvas-wrap {
+  width: 100%;
+  height: 100%;
+}
+
+.disd-card-3d-canvas-wrap canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
+.disd-card-3d-spinner-wrap {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.disd-card-3d-spinner {
+  width: 26px;
+  height: 26px;
+  border: 3px solid rgba(255, 153, 0, 0.2);
+  border-top-color: #FF9900;
+  border-radius: 50%;
+  animation: disdCard3dSpin 0.75s linear infinite;
+}
+
+@keyframes disdCard3dSpin {
+  to { transform: rotate(360deg); }
 }
 
 .disd-cat-five-btn-icon {
@@ -784,10 +928,9 @@ textarea {
   transition: all 0.3s ease;
 }
 
-.disd-cat-five-card:hover .disd-cat-five-btn-icon {
+.disd-cat-five-btn-icon.back-active {
   background-color: #FF9900;
   color: #000000;
-  transform: translateX(3px) translateZ(10px);
 }
 
 /* 7. Why Choose DISD Banner */
@@ -971,17 +1114,34 @@ textarea {
   gap: 32px;
 }
 
+.disd-products-fade-in {
+  animation: productGridFade 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes productGridFade {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .disd-product-card {
   background-color: #FFFFFF;
   border: 1px solid #E2E8F0;
   border-radius: 14px;
   overflow: hidden;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
-  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
   cursor: pointer;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  will-change: transform, box-shadow;
+  contain: content;
 }
 
 .disd-product-card:hover {
@@ -1003,18 +1163,18 @@ textarea {
   transform-style: preserve-3d;
   overflow: hidden;
   cursor: pointer;
+  contain: paint;
 }
 
 .disd-prod-img-wrap::before {
   content: '';
   position: absolute;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.45), transparent);
-  top: -100%;
-  left: -100%;
-  transition: all 0.6s ease;
-  transform: translateZ(20px);
+  inset: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent 40%, rgba(255, 255, 255, 0.5) 50%, transparent 60%);
+  transform: translate3d(-100%, -100%, 0);
+  transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
   z-index: 3;
   pointer-events: none;
 }
@@ -1030,15 +1190,14 @@ textarea {
     transparent 100%
   );
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.25s ease;
   z-index: 2;
   pointer-events: none;
 }
 
 .disd-product-card:hover .disd-prod-img-wrap::before,
 .disd-prod-img-wrap:hover::before {
-  top: 100%;
-  left: 100%;
+  transform: translate3d(100%, 100%, 0);
 }
 
 .disd-product-card:hover .disd-prod-img-wrap::after,
@@ -1051,13 +1210,40 @@ textarea {
   max-width: 100%;
   object-fit: contain;
   transform-style: preserve-3d;
-  transition: transform 1s ease;
+  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
   backface-visibility: visible;
-  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.1));
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.08));
+  will-change: transform;
 }
 
 .disd-product-card:hover .disd-prod-img {
-  transform: scale(1.05);
+  transform: scale(1.045);
+}
+
+/* Modal Smooth Entrance Animations */
+.disd-modal-backdrop {
+  animation: modalBackdropFade 0.2s ease-out forwards;
+}
+
+.disd-modal-dialog {
+  animation: modalDialogEnter 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+@keyframes modalBackdropFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalDialogEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 .disd-model-badge {

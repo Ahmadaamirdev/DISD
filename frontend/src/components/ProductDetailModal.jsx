@@ -1,14 +1,28 @@
-import React from 'react';
-import { X, CheckCircle, ShieldCheck, ArrowRight } from 'lucide-react';
+import React, { useEffect } from 'react';
+import { X, CheckCircle, ArrowRight } from 'lucide-react';
 import { getAssetUrl } from '../data/cloudinaryAssets.js';
 
 export default function ProductDetailModal({ product, onClose, onSelectForQuote }) {
   if (!product) return null;
 
+  // Close on Escape key press
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div 
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 disd-modal-backdrop"
+      onClick={onClose}
+    >
       <div 
-        className="bg-white rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-gray-300"
+        className="bg-white rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-gray-300 disd-modal-dialog"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
@@ -25,6 +39,7 @@ export default function ProductDetailModal({ product, onClose, onSelectForQuote 
             onClick={onClose}
             className="p-2 text-gray-500 hover:text-black hover:bg-gray-200 rounded-full transition"
             aria-label="Close"
+            type="button"
           >
             <X size={20} />
           </button>
@@ -39,6 +54,10 @@ export default function ProductDetailModal({ product, onClose, onSelectForQuote 
                 src={getAssetUrl(product.image)} 
                 alt={product.title} 
                 className="max-h-full max-w-full object-contain"
+                loading="eager"
+                decoding="async"
+                width="340"
+                height="250"
               />
             </div>
 
@@ -128,6 +147,7 @@ export default function ProductDetailModal({ product, onClose, onSelectForQuote 
           <button
             onClick={onClose}
             className="px-4 py-2 border border-gray-300 rounded text-xs font-semibold text-gray-700 hover:bg-gray-100 transition"
+            type="button"
           >
             Close
           </button>
@@ -137,6 +157,7 @@ export default function ProductDetailModal({ product, onClose, onSelectForQuote 
               onClose();
             }}
             className="px-5 py-2 bg-[#FF9900] hover:bg-[#E68A00] text-black text-xs font-bold uppercase tracking-wider rounded transition shadow flex items-center gap-1.5"
+            type="button"
           >
             <span>Request Price Quote</span>
             <ArrowRight size={14} />

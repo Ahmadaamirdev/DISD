@@ -58,9 +58,6 @@ export default function App() {
 
   const handlePreloaderComplete = () => {
     setShowPreloader(false);
-    setTimeout(() => {
-      window.dispatchEvent(new Event('resize'));
-    }, 60);
   };
 
   const handleSelectProductForQuote = (product) => {
