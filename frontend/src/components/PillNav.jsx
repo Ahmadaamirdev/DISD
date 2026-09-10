@@ -315,8 +315,23 @@ export default function PillNav({
                   if (item.onClick) {
                     e.preventDefault();
                     handleItemClick(item, index);
+                  } else if (item.href && item.href.startsWith('#')) {
+                    e.preventDefault();
+                    handleItemClick(item, index);
+                    const targetId = item.href.replace('#', '');
+                    if (targetId) {
+                      const targetEl = document.getElementById(targetId);
+                      if (targetEl) {
+                        targetEl.scrollIntoView({ behavior: 'smooth' });
+                      }
+                    } else {
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
                   } else {
                     handleItemClick(item, index);
+                  }
+                  if (e.currentTarget && e.currentTarget.blur) {
+                    e.currentTarget.blur();
                   }
                 }}
                 className="disd-nav-item"
@@ -401,9 +416,23 @@ export default function PillNav({
               ) : (
                 <a
                   href={it.href || '#'}
-                  onClick={() => {
+                  onClick={(e) => {
                     setMobileMenuOpen(false);
-                    if (it.onClick) it.onClick();
+                    if (it.onClick) {
+                      e.preventDefault();
+                      it.onClick();
+                    } else if (it.href && it.href.startsWith('#')) {
+                      e.preventDefault();
+                      const targetId = it.href.replace('#', '');
+                      if (targetId) {
+                        const targetEl = document.getElementById(targetId);
+                        if (targetEl) {
+                          targetEl.scrollIntoView({ behavior: 'smooth' });
+                        }
+                      } else {
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      }
+                    }
                   }}
                   style={{ display: 'block', color: '#fff', padding: '8px 0', fontWeight: 600, textDecoration: 'none' }}
                 >

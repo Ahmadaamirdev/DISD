@@ -564,10 +564,11 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
     // 9. Resize Handling
     let lastW = 0;
     let lastH = 0;
+    let resizeRafId = null;
     const handleResize = () => {
       const width = getWidth();
       const height = getHeight();
-      if (!width || !height || (width === lastW && height === lastH)) return;
+      if (!width || !height || (Math.abs(width - lastW) < 2 && Math.abs(height - lastH) < 2)) return;
       lastW = width;
       lastH = height;
       camera.aspect = width / height;
@@ -576,7 +577,10 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
       try {
         renderer.render(scene, camera);
       } catch (e) {}
-      updateCardPositions();
+      if (resizeRafId) cancelAnimationFrame(resizeRafId);
+      resizeRafId = requestAnimationFrame(() => {
+        updateCardPositions();
+      });
     };
 
     window.addEventListener('resize', handleResize, { passive: true });

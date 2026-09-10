@@ -9,6 +9,7 @@ import QuoteEstimator from './components/QuoteEstimator.jsx';
 import Footer from './components/Footer.jsx';
 import SectionDivider from './components/SectionDivider.jsx';
 import SitePreloader from './components/SitePreloader.jsx';
+import useSmoothScroll from './hooks/useSmoothScroll.js';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -46,6 +47,8 @@ class ErrorBoundary extends React.Component {
 }
 
 export default function App() {
+  useSmoothScroll();
+
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [quoteTargetProduct, setQuoteTargetProduct] = useState(null);
   const [isModelLoaded, setIsModelLoaded] = useState(false);

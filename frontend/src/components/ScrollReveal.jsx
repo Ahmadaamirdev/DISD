@@ -22,8 +22,8 @@ function getSharedObserver() {
         });
       },
       {
-        threshold: 0.05,
-        rootMargin: '0px 0px 80px 0px'
+        threshold: 0,
+        rootMargin: '0px 0px 140px 0px'
       }
     );
   }
@@ -46,13 +46,6 @@ export default function ScrollReveal({
   useEffect(() => {
     const el = domRef.current;
     if (!el) return;
-
-    // Fast check: if element is already within viewport on mount, reveal immediately
-    const rect = el.getBoundingClientRect();
-    if (rect.top < window.innerHeight && rect.bottom > 0) {
-      setIsVisible(true);
-      return;
-    }
 
     const observer = getSharedObserver();
     if (!observer) {

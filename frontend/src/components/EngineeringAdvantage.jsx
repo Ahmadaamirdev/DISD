@@ -27,19 +27,19 @@ export default function EngineeringAdvantage() {
 
   const pillars = [
     {
-      icon: <Users size={26} />,
+      icon: <Users size={22} />,
       title: "Professional Team",
       description: "Our team brings years of experience in the heavy equipment industry, ensuring professional guidance and responsive support at every step.",
       link: "#company-profile"
     },
     {
-      icon: <Settings size={26} />,
+      icon: <Settings size={22} />,
       title: "Exquisite Craftsmanship",
       description: "We work with world-leading manufacturers and follow strict quality control processes to ensure every machine meets the highest standards of performance and durability.",
       link: "#products"
     },
     {
-      icon: <ShieldCheck size={26} />,
+      icon: <ShieldCheck size={22} />,
       title: "Reputation Throughout the World",
       description: "Our products and services are trusted in many countries, supported by long-term partnerships and a strong global network of clients and contractors.",
       link: "#where-to-buy"
