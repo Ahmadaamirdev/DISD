@@ -1,0 +1,452 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "knowledgeBaseMetadata": {
+    "organization": "Dragon International Services & Development LLC (DISD)",
+    "version": "1.0.0",
+    "lastUpdated": "2026-09-10",
+    "description": "Official AI Chatbot & RAG Knowledge Base for Dragon International Services & Development LLC (DISD). Contains company profile, technical parameters, carrier compatibility, warranty terms, commercial RFQ procedures, maintenance troubleshooting, and bilingual FAQs.",
+    "primaryLanguage": "en",
+    "supportedLanguages": ["en", "ar", "zh"],
+    "targetAudience": ["Contractors", "Quarry & Mine Operators", "Civil Engineers", "Procurement Managers", "Heavy Equipment Distributors"]
+  },
+  "botPersona": {
+    "name": "DISD Industrial Assistant",
+    "role": "Official Technical & Commercial Heavy Machinery Specialist",
+    "tone": "Authoritative, technical, professional, prompt, and courteous",
+    "systemInstructions": "You are the official AI representative of Dragon International Services & Development LLC (DISD). Assist users with excavator attachment matching, technical parameter inquiries (pressure, flow, carrier weight), quotation requests (RFQ), warranty clarification, and depot contact details. When users ask for prices, encourage them to provide carrier model, tonnage, and delivery location to prepare an official CIF/FOB quotation."
+  },
+  "companyProfile": {
+    "legalName": "Dragon International Services & Development LLC",
+    "tradeName": "DISD",
+    "tagline": "Maximum Impact. Minimum Downtime.",
+    "mission": "To engineer and distribute Japanese Komatsu KES standard demolition attachments and heavy machinery across Saudi Arabia, GCC, and global markets.",
+    "manufacturingStandards": [
+      "Japan Komatsu KES Industrial Standard",
+      "6S Lean Production Management",
+      "ISO 9001:2015 Quality Management System",
+      "ISO 14001 Environmental Management System",
+      "CE European Machinery Directive Certification"
+    ],
+    "headquartersAndDepots": [
+      {
+        "facilityType": "Regional Sales & Engineering Depot",
+        "region": "Western Province, Saudi Arabia",
+        "city": "Jeddah",
+        "address": "حي، طريق جازان العام, Al Jawharah, Jeddah, Kingdom of Saudi Arabia",
+        "addressArabic": "حي، طريق جازان العام، الجوهرة، جدة، المملكة العربية السعودية",
+        "phone": "+966-543732208",
+        "email": "shoaib@deepaxis.cn",
+        "operatingHours": "Sunday – Thursday: 08:00 – 18:00 (GMT+3)"
+      }
+    ],
+    "coreCapabilities": [
+      "Hydraulic Breaker Research, Design & Precision CNC Manufacturing",
+      "High-alloy Hardox 500 Forged Excavator Attachments",
+      "Rough-Terrain 4WD and Lithium-Ion Material Handling Forklifts",
+      "Excavator Quick-Coupler Adapter Bracket Custom Engineering",
+      "On-site Hydraulic Flow & Pressure Calibration Services",
+      "Immediate Spare Parts Logistics across the Middle East & Africa"
+    ],
+    "warrantyPolicy": {
+      "standardDuration": "24 Months Structural Warranty / 12 Months Core Hydraulic Powercell Warranty",
+      "operatingHoursLimit": "3,000 Operating Hours",
+      "coverage": "Cylinder, main body, front head, back head, accumulator shell, and internal valve body against casting or manufacturing defects.",
+      "responseGuarantee": "Official technical response and parts dispatch dispatched within 24 business hours."
+    }
+  },
+  "productCatalog": [
+    {
+      "id": "prod-1",
+      "modelNumber": "DISD-TB210",
+      "series": "Heavy Triangular Series / Series 4BE",
+      "title": "Triangular Hydraulic Breaker (Heavy Series)",
+      "category": "Hydraulic Breaker",
+      "targetExcavator": "20 - 32 Ton",
+      "specifications": {
+        "operatingWeight": "1,850 kg - 3,200 kg",
+        "applicableExcavator": "20 - 32 Ton (e.g., CAT 320/330, Komatsu PC200/PC300, Volvo EC210)",
+        "operatingPressure": "160 - 180 bar (2,320 - 2,610 psi)",
+        "oilFlowRate": "150 - 190 L/min",
+        "impactRate": "350 - 650 bpm",
+        "impactEnergy": "5,500 - 8,200 Joules",
+        "chiselDiameter": "140 mm (High-Alloy Forged Core)",
+        "hydraulicHoseDiameter": "1 inch (high-pressure dual braided)",
+        "nitrogenGasPressure": "Accumulator: 55 - 60 bar / Back Head: 14 - 16 bar",
+        "standardWarranty": "24 Months Structural / 12 Months Core Hydraulic",
+        "manufacturingStandard": "Japan Komatsu KES / 6S Lean / CE & ISO Certified"
+      },
+      "features": [
+        "Anti-blank firing auto-cushion system preventing piston and tie-rod fractures",
+        "Pressurized nitrogen gas accumulator boosting kinetic impact energy by 25%",
+        "Hardox 500 wear-resistant exterior side plates engineered for abrasive granite and basalt quarries",
+        "Dual-return low-recoil hydraulic relief valve protecting excavator boom bushings",
+        "Pre-installed central auto-greasing port compatibility"
+      ],
+      "applications": [
+        "Quarry & open-pit granite/limestone extraction",
+        "Highway rock cutting and trenching",
+        "Heavy reinforced concrete demolition",
+        "Tunneling and underground civil infrastructure"
+      ]
+    },
+    {
+      "id": "prod-2",
+      "modelNumber": "DISD-FL500-4WD",
+      "series": "Rough-Terrain 4WD Series",
+      "title": "Heavy-Duty All-Terrain Forklift",
+      "category": "Forklift",
+      "targetExcavator": "Self-Propelled Heavy Carrier",
+      "specifications": {
+        "operatingWeight": "6,800 kg",
+        "ratedCapacity": "5,000 kg (5.0 Metric Tons)",
+        "driveType": "Full-Time 4-Wheel Drive with Electronic Differential Lock",
+        "liftHeight": "4,500 mm (Triplex Full-Free Mast)",
+        "operatingPressure": "210 bar",
+        "oilFlowRate": "85 L/min",
+        "engineOutput": "74 kW @ 2,200 rpm Heavy-Duty Turbocharged Diesel",
+        "groundClearance": "320 mm",
+        "turningRadius": "3,450 mm",
+        "standardWarranty": "18 Months / 2,000 Operating Hours",
+        "manufacturingStandard": "ISO 9001 / CE Certified / 6S Lean"
+      },
+      "features": [
+        "Electronic differential lock delivering high traction on soft sand and muddy worksites",
+        "ROPS / FOPS Level II certified panoramic safety operator cabin with heavy-duty air conditioning",
+        "Deep-tread pneumatic off-road traction tires with puncture-resistant sidewalls",
+        "Integrated hydraulic fork positioner and side-shifter"
+      ],
+      "applications": [
+        "Desert infrastructure material staging",
+        "Mining and quarry supply yard logistics",
+        "Precast concrete component handling",
+        "Remote oil & gas depot logistics"
+      ]
+    },
+    {
+      "id": "prod-3",
+      "modelNumber": "DISD-VC80",
+      "series": "High-Frequency Compaction Series",
+      "title": "High-Frequency Vibrating Compactor",
+      "category": "Compaction Equipment",
+      "targetExcavator": "12 - 20 Ton",
+      "specifications": {
+        "operatingWeight": "920 kg",
+        "applicableExcavator": "12 - 20 Ton",
+        "operatingPressure": "140 - 160 bar",
+        "oilFlowRate": "80 - 110 L/min",
+        "vibrationFrequency": "2,000 - 2,400 vpm",
+        "impulseForce": "82 kN",
+        "plateDimensions": "1,100 mm x 800 mm",
+        "standardWarranty": "12 Months Comprehensive",
+        "manufacturingStandard": "Japan Komatsu KES Standard"
+      },
+      "features": [
+        "Premium Swedish rubber isolation dampeners absorbing 95% of vibration recoil away from the carrier boom",
+        "Dual counter-rotating eccentric shafts delivering dense, uniform soil and aggregate consolidation",
+        "Continuous-duty bidirectional hydraulic motor with overload pressure relief bypass",
+        "Interchangeable quick-coupler adapter plate"
+      ],
+      "applications": [
+        "Pipeline and utility trench backfill",
+        "Road embankment foundation compaction",
+        "Bridge abutment and retaining wall consolidation",
+        "Railway track bed leveling"
+      ]
+    },
+    {
+      "id": "prod-4",
+      "modelNumber": "DISD-EX360HD",
+      "series": "Heavy Mining Crawler Series",
+      "title": "Heavy Crawler Hydraulic Excavator",
+      "category": "Excavator",
+      "targetExcavator": "Primary 36-Ton Heavy Earthmover",
+      "specifications": {
+        "operatingWeight": "35,800 kg",
+        "enginePower": "212 kW @ 1,950 rpm Tier 3 / Tier 4F",
+        "operatingPressure": "343 bar (373 bar with Power Boost)",
+        "oilFlowRate": "2 x 290 L/min",
+        "bucketCapacity": "1.8 - 2.2 m³",
+        "bucketDiggingForce": "235 kN",
+        "maxDiggingReach": "10,870 mm",
+        "maxDiggingDepth": "7,380 mm",
+        "standardWarranty": "24 Months / 3,000 Operating Hours",
+        "manufacturingStandard": "6S Lean / ISO 14001 / CE Certified"
+      },
+      "features": [
+        "Tropicalized cooling radiator architecture tested for 55°C extreme Arabian desert heat",
+        "Positive flow hydraulic control system delivering micro-second operator valve response",
+        "Reinforced heavy-duty X-frame undercarriage and forged track link rock guards",
+        "Factory pre-installed dual auxiliary hydraulic piping for instant breaker and grapple hookup"
+      ],
+      "applications": [
+        "Open-pit quarrying and bulk rock handling",
+        "Mega-infrastructure civil earthworks",
+        "Deep foundation and drainage trenching",
+        "Harbor and breakwater maritime construction"
+      ]
+    },
+    {
+      "id": "prod-5",
+      "modelNumber": "DISD-WG360",
+      "series": "Heavy 360° Demolition Attachment Series",
+      "title": "Industrial Hydraulic Wood & Stone Grapple",
+      "category": "Attachments",
+      "targetExcavator": "18 - 26 Ton",
+      "specifications": {
+        "operatingWeight": "1,450 kg",
+        "applicableExcavator": "18 - 26 Ton",
+        "operatingPressure": "180 - 210 bar",
+        "oilFlowRate": "100 - 130 L/min",
+        "clampingForce": "115 kN",
+        "maxJawOpening": "1,950 mm",
+        "rotationAngle": "360° Continuous Hydraulic Rotation",
+        "standardWarranty": "12 Months Mechanical / Hydraulic",
+        "manufacturingStandard": "6S Lean / Komatsu KES Compatible"
+      },
+      "features": [
+        "Hardox 500 reinforced tine tips ensuring zero plastic deformation under rock loading",
+        "Heavy-duty slewing ring with sealed planetary gear reduction drive",
+        "Enclosed dual hydraulic cylinders protected from flying stone impacts",
+        "Integrated bi-directional safety relief valves preventing hydraulic pressure spikes"
+      ],
+      "applications": [
+        "Quarry riprap sorting and seawall boulder placement",
+        "Building demolition debris segregation",
+        "Forestry and industrial log handling",
+        "Scrap metal handling and sorting"
+      ]
+    },
+    {
+      "id": "prod-6",
+      "modelNumber": "DISD-SL1400",
+      "series": "Aerial Plant Access Series",
+      "title": "Rough-Terrain Scissor Lift & Lifting Slings",
+      "category": "Scissor Lift",
+      "targetExcavator": "Independent Mobile Aerial Platform",
+      "specifications": {
+        "operatingWeight": "4,200 kg",
+        "workingHeight": "14.0 m - 16.0 m",
+        "platformCapacity": "450 kg (Dual Operator + Tooling)",
+        "operatingPressure": "175 bar",
+        "oilFlowRate": "45 L/min",
+        "powerSource": "48V 320Ah Deep-Cycle Battery / Optional Diesel Hybrid",
+        "gradeability": "30%",
+        "standardWarranty": "18 Months Structural & Electrical",
+        "manufacturingStandard": "EN280 / CE / ISO 9001"
+      },
+      "features": [
+        "Automatic pothole protection and dynamic slope tilt cutoff safety sensors",
+        "High ground clearance with 4 one-touch self-leveling hydraulic outriggers",
+        "Certified forged rigging sling eyelets for crane placement into ship holds and pits",
+        "Auxiliary manual descent valve for emergency power loss scenarios"
+      ],
+      "applications": [
+        "Petrochemical refinery pipeline maintenance",
+        "Structural steel building erection",
+        "Commercial facade and cladding installation",
+        "Airport and shipyard hangar maintenance"
+      ]
+    }
+  ],
+  "excavatorCompatibilityGuide": {
+    "supportedBrands": [
+      "Caterpillar (CAT)",
+      "Komatsu",
+      "Volvo Construction Equipment",
+      "Hyundai Heavy Industries",
+      "Doosan / Develon",
+      "Sany",
+      "Hitachi",
+      "Kobelco",
+      "JCB",
+      "XCMG",
+      "Liugong",
+      "Case"
+    ],
+    "carrierTonnageMatchingTable": [
+      {
+        "carrierTonnage": "0.8 - 2.5 Ton",
+        "recommendedBreakerSeries": "Micro/Mini Series",
+        "chiselDiameter": "40 - 53 mm",
+        "operatingPressure": "90 - 120 bar",
+        "oilFlow": "15 - 30 L/min",
+        "typicalCarrierExamples": "CAT 301.5, Komatsu PC18, Kubota KX018"
+      },
+      {
+        "carrierTonnage": "3.0 - 7.0 Ton",
+        "recommendedBreakerSeries": "Light Compact Series",
+        "chiselDiameter": "68 - 75 mm",
+        "operatingPressure": "110 - 140 bar",
+        "oilFlow": "40 - 70 L/min",
+        "typicalCarrierExamples": "CAT 305, Komatsu PC55, Bobcat E50"
+      },
+      {
+        "carrierTonnage": "12 - 18 Ton",
+        "recommendedBreakerSeries": "Medium Utility Series",
+        "chiselDiameter": "100 - 120 mm",
+        "operatingPressure": "140 - 170 bar",
+        "oilFlow": "90 - 130 L/min",
+        "typicalCarrierExamples": "CAT 312/315, Komatsu PC130, Volvo EC140"
+      },
+      {
+        "carrierTonnage": "20 - 26 Ton",
+        "recommendedBreakerSeries": "Heavy Commercial Series (DISD-TB210)",
+        "chiselDiameter": "135 - 140 mm",
+        "operatingPressure": "160 - 180 bar",
+        "oilFlow": "150 - 190 L/min",
+        "typicalCarrierExamples": "CAT 320/323, Komatsu PC200/PC220, Volvo EC210/EC220, Hyundai HX220"
+      },
+      {
+        "carrierTonnage": "28 - 36 Ton",
+        "recommendedBreakerSeries": "Heavy Quarry Series (Series 4BE)",
+        "chiselDiameter": "150 - 165 mm",
+        "operatingPressure": "160 - 180 bar",
+        "oilFlow": "180 - 240 L/min",
+        "typicalCarrierExamples": "CAT 330/336, Komatsu PC300/PC360, Volvo EC300, Doosan DX300"
+      },
+      {
+        "carrierTonnage": "40 - 70 Ton",
+        "recommendedBreakerSeries": "Super Heavy Mining Series",
+        "chiselDiameter": "175 - 200 mm",
+        "operatingPressure": "160 - 190 bar",
+        "oilFlow": "240 - 380 L/min",
+        "typicalCarrierExamples": "CAT 349/374, Komatsu PC450/PC600, Volvo EC480/EC750"
+      }
+    ],
+    "bracketPinDimensionsRequired": [
+      "Pin Diameter (mm)",
+      "Dipper Stick Ear Width / Gap (mm)",
+      "Center-to-Center Distance between Pins (mm)"
+    ],
+    "note": "DISD manufactures custom machined adapter plates and universal quick couplers ensuring plug-and-play pin alignment for all major excavator models."
+  },
+  "quotationAndCommercialProcess": {
+    "rfqSteps": [
+      {
+        "step": 1,
+        "title": "Equipment & Carrier Identification",
+        "description": "Customer provides desired machinery (hydraulic breaker, compactor, grapple, etc.) and carrier machine make/model/year."
+      },
+      {
+        "step": 2,
+        "title": "Hydraulic Parameter Verification",
+        "description": "DISD engineers verify auxiliary pump pressure, flow rate, and relief valve settings to ensure carrier hydraulic safety."
+      },
+      {
+        "step": 3,
+        "title": "Pin & Bracket Customization",
+        "description": "DISD confirms pin diameter, ear width, and center spacing to provide ready-to-mount adapter plates."
+      },
+      {
+        "step": 4,
+        "title": "Commercial Quotation Issuance",
+        "description": "Formal proforma invoice dispatched with FOB or CIF Jeddah pricing, delivery timelines, and warranty certificate within 24 hours."
+      }
+    ],
+    "supportedTradeTerms": ["FOB", "CIF Jeddah", "CIF Dammam", "DDP Saudi Arabia", "Ex-Works Factory"],
+    "paymentMethods": ["Letter of Credit (L/C)", "Telegraphic Transfer (T/T)", "Commercial Bank Guarantee"],
+    "requiredCustomerDetails": [
+      "Contact Full Name & Company Name",
+      "Official Corporate Email & Telephone / WhatsApp",
+      "Country and Project City",
+      "Excavator Model and Tonnage",
+      "Estimated Project Start Date"
+    ]
+  },
+  "maintenanceAndTroubleshooting": {
+    "greasingProtocol": {
+      "frequency": "Every 2 to 3 operating hours during active rock breaking",
+      "recommendedGrease": "High-temperature lithium-molybdenum disulfide (MoS2) chisel paste",
+      "procedure": "Keep breaker vertical with chisel pressed firmly against hard rock to ensure grease coats the upper and lower bushings without entering the hydraulic piston chamber."
+    },
+    "nitrogenPressureMaintenance": {
+      "checkInterval": "Inspect nitrogen pressure every 100 to 150 operating hours",
+      "symptomOfLowN2": "Reduced impact energy, slower strike rate, elevated hydraulic hose vibration",
+      "symptomOfExcessN2": "Irregular strikes, excessive recoil transferred into the excavator boom"
+    },
+    "blankFiringPrevention": {
+      "definition": "Striking with the hydraulic breaker when the chisel is not in contact with rock or concrete.",
+      "damageCaused": "Piston impact directly into front head, causing broken tie-rods, retainer pins, and fractured cylinders.",
+      "disdSafetyFeature": "DISD heavy breakers integrate an auto-cushion anti-blank firing valve that diverts hydraulic pressure harmlessly when the chisel is fully extended."
+    },
+    "hydraulicOilQuality": {
+      "oilType": "Anti-wear hydraulic oil ISO VG 46 (Moderate climate) or ISO VG 68 (Desert Middle East heat)",
+      "filtration": "Return line filter rating must be 10 microns or finer",
+      "maximumOilTemp": "Should not exceed 80°C (176°F) under peak ambient desert conditions."
+    }
+  },
+  "frequentlyAskedQuestions": [
+    {
+      "category": "General & Company",
+      "question": "What is DISD and what does the company manufacture?",
+      "answer": "Dragon International Services & Development LLC (DISD) is an international heavy equipment manufacturer and distributor. We engineer Japanese Komatsu KES-compliant hydraulic breakers, rough-terrain forklifts, excavators, compaction equipment, and heavy demolition attachments with regional headquarters in Jeddah, Saudi Arabia."
+    },
+    {
+      "category": "General & Company",
+      "question": "Where is DISD located in Saudi Arabia?",
+      "answer": "Our regional sales, technical engineering, and spare parts depot is located on Jazan Public Road, Al Jawharah District, Jeddah, Saudi Arabia (حي، طريق جازان العام, Al Jawharah, Jeddah). Direct phone: +966-543732208."
+    },
+    {
+      "category": "Technical & Compatibility",
+      "question": "How do I choose the correct hydraulic breaker for my excavator?",
+      "answer": "Match your excavator operating weight to the breaker's recommended carrier range. For example, a 20-30 ton excavator (e.g. CAT 320, Komatsu PC200) pairs with our 140mm chisel DISD-TB210 (1,850 - 3,200 kg). Verify your carrier provides 150-190 L/min oil flow at 160-180 bar operating pressure."
+    },
+    {
+      "category": "Technical & Compatibility",
+      "question": "Will a DISD breaker fit my CAT, Komatsu, Volvo, or Hyundai excavator?",
+      "answer": "Yes. Every DISD breaker is supplied with a tailor-machined adapter mounting bracket matching your excavator's exact pin diameter, stick ear width, and center-to-center distance, ensuring 100% plug-and-play installation."
+    },
+    {
+      "category": "Technical & Compatibility",
+      "question": "What is the difference between Triangular, Box (Silenced), and Side-Type breakers?",
+      "answer": "Triangular breakers offer high maneuverability, easy maintenance access, and lower cost for open quarries. Box-type (silenced) breakers feature fully enclosed sound-dampened housings ideal for municipal urban demolition. Side-type breakers offer maximum upward reach for high-wall scaling and tunneling."
+    },
+    {
+      "category": "Warranty & Service",
+      "question": "What warranty does DISD provide on machinery?",
+      "answer": "We offer a 24-month structural warranty and a 12-month core hydraulic warranty on our hydraulic breaker range, and up to 24 months / 3,000 operating hours on excavators. All warranty claims are backed by our Jeddah regional depot with 24-hour response turnaround."
+    },
+    {
+      "category": "Warranty & Service",
+      "question": "Are spare parts (chisels, seal kits, diaphragms, bushings) readily available?",
+      "answer": "Yes. Our Jeddah warehouse maintains inventory of high-wear consumables including forged moil/wedge/blunt chisels, Parker/NOK polyurethane seal kits, nitrogen accumulators, and Hardox wear plates for immediate dispatch."
+    },
+    {
+      "category": "Commercial & Pricing",
+      "question": "How quickly can I get a quotation?",
+      "answer": "Our commercial engineering team delivers an official proforma quotation with technical matching sheets within 24 business hours. You can request a quote via our website RFQ form or by emailing shoaib@deepaxis.cn."
+    },
+    {
+      "category": "Commercial & Pricing",
+      "question": "What shipping terms do you support?",
+      "answer": "We support FOB, CIF Jeddah Port, CIF King Abdulaziz Port (Dammam), and local road delivery throughout the Kingdom of Saudi Arabia and GCC countries."
+    },
+    {
+      "category": "Maintenance",
+      "question": "How often should I grease the hydraulic breaker?",
+      "answer": "Grease the tool bushings every 2 to 3 operating hours using molybdenum disulfide chisel paste. Always keep the breaker pressed firmly down against the ground while greasing to prevent paste from contaminating the hydraulic piston seals."
+    }
+  ],
+  "quickReplies": [
+    {
+      "label": "Get a Machinery Quote",
+      "action": "TRIGGER_RFQ_FORM",
+      "payload": "#quote-estimator"
+    },
+    {
+      "label": "Hydraulic Breaker Catalog",
+      "action": "FILTER_CATEGORY",
+      "payload": "Hydraulic Breaker"
+    },
+    {
+      "label": "Carrier Compatibility Check",
+      "action": "SHOW_COMPATIBILITY_TABLE",
+      "payload": "compatibility-guide"
+    },
+    {
+      "label": "Contact Jeddah Depot",
+      "action": "SHOW_CONTACT_INFO",
+      "payload": "+966-543732208"
+    }
+  ]
+}
