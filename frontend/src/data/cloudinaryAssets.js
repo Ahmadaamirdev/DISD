@@ -20,9 +20,13 @@ export function getAssetUrl(pathOrName) {
   const filename = pathOrName.split('/').pop().split('?')[0];
   let url = cloudinaryAssets[filename] || pathOrName;
 
-  // Automatically serve modern WebP/AVIF images with optimal compression
-  if (typeof url === 'string' && url.includes('/image/upload/') && !url.includes('/f_auto')) {
-    url = url.replace('/image/upload/', '/image/upload/f_auto,q_auto/');
+  // Automatically serve modern WebP/AVIF images and compressed video streams
+  if (typeof url === 'string') {
+    if (url.includes('/image/upload/') && !url.includes('/f_auto')) {
+      url = url.replace('/image/upload/', '/image/upload/f_auto,q_auto/');
+    } else if (url.includes('/video/upload/') && !url.includes('/f_auto') && !url.includes('/q_auto')) {
+      url = url.replace('/video/upload/', '/video/upload/f_auto,q_auto/');
+    }
   }
 
   return url;

@@ -27,7 +27,18 @@ export const cloudinaryAssets = assetMap;
 export function getAssetUrl(pathOrName) {
   if (!pathOrName) return pathOrName;
   const filename = pathOrName.split('/').pop().split('?')[0];
-  return cloudinaryAssets[filename] || pathOrName;
+  let url = cloudinaryAssets[filename] || pathOrName;
+
+  // Automatically serve modern WebP/AVIF images and compressed video streams
+  if (typeof url === 'string') {
+    if (url.includes('/image/upload/') && !url.includes('/f_auto')) {
+      url = url.replace('/image/upload/', '/image/upload/f_auto,q_auto/');
+    } else if (url.includes('/video/upload/') && !url.includes('/f_auto') && !url.includes('/q_auto')) {
+      url = url.replace('/video/upload/', '/video/upload/f_auto,q_auto/');
+    }
+  }
+
+  return url;
 }
 
 export default cloudinaryAssets;

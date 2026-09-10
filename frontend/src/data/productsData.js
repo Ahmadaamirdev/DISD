@@ -9,6 +9,7 @@ export const initialProducts = [
     modelNumber: "DISD-TB210",
     image: getAssetUrl("/assets/2025620852505638.jpg"),
     thumbnail: getAssetUrl("/assets/01.png"),
+    model: getAssetUrl("/assets/tripo_pbr_model_4be6fa61-73bb-4da0-b263-fd93bf51e0cc_meshopt.glb"),
     description: "Engineered under Japanese Komatsu KES standards with high-alloy forged steel chisel. Delivers maximum impact energy with low hydraulic recoil for quarrying, tunneling, and reinforced concrete demolition.",
     specifications: {
       operatingWeight: "1,850 kg - 3,200 kg",
@@ -124,6 +125,7 @@ export const initialProducts = [
     modelNumber: "DISD-WG360",
     image: getAssetUrl("/assets/2025571927321350.jpg"),
     thumbnail: getAssetUrl("/assets/01.png"),
+    model: getAssetUrl("/assets/tripo_pbr_model_67a24335-d80a-4bef-978a-3c607204e711_meshopt.glb"),
     description: "360-degree continuous rotation hydraulic grapple featuring dual cylinders with integrated counter-balance valves for rock handling, timber handling, and scrap demolition.",
     specifications: {
       operatingWeight: "1,450 kg",
