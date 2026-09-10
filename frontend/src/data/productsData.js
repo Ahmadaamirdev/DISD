@@ -37,6 +37,7 @@ export const initialProducts = [
     modelNumber: "DISD-FL500-4WD",
     image: getAssetUrl("/assets/2025572057496639.jpg"),
     thumbnail: getAssetUrl("/assets/02.png"),
+    model: getAssetUrl("/assets/tripo_pbr_model_ee9cdc69-76a0-42b8-8eea-c47ed3342c9a_meshopt.glb"),
     description: "Four-wheel-drive rough terrain forklift engineered for harsh construction sites, desert logistics, and uneven industrial yards with high ground clearance and reinforced mast.",
     specifications: {
       operatingWeight: "6,800 kg",
@@ -65,6 +66,7 @@ export const initialProducts = [
     modelNumber: "DISD-VC80",
     image: getAssetUrl("/assets/2025571908367950.jpg"),
     thumbnail: getAssetUrl("/assets/03.png"),
+    model: getAssetUrl("/assets/tripo_pbr_model_003af8d7-9e6e-4ee6-a122-b9971804e582_meshopt.glb"),
     description: "Excavator-mounted vibrating compactor plate built for trench backfill, embankment consolidation, and roadbed preparation with vibration dampening technology.",
     specifications: {
       operatingWeight: "920 kg",
@@ -93,6 +95,7 @@ export const initialProducts = [
     modelNumber: "DISD-EX360HD",
     image: getAssetUrl("/assets/2025572005225896.jpg"),
     thumbnail: getAssetUrl("/assets/04.png"),
+    model: getAssetUrl("/assets/tripo_pbr_model_056f077c-e0e5-4fc8-9e06-1e2d0d78fbd2_meshopt.glb"),
     description: "High-efficiency 36-ton class hydraulic crawler excavator tailored for Middle Eastern high-temperature environments with tropicalized cooling radiators and heavy rock boom.",
     specifications: {
       operatingWeight: "35,800 kg",

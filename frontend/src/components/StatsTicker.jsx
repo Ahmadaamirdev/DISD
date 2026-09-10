@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ArrowRight } from 'lucide-react';
 import ScrollReveal from './ScrollReveal.jsx';
-import CategoryCard3DViewer from './CategoryCard3DViewer.jsx';
+import CategoryCard3DViewer, { preloadAllCategoryModels, preloadCategoryModel } from './CategoryCard3DViewer.jsx';
 import { getAssetUrl } from '../data/cloudinaryAssets';
 
 export default function StatsTicker({ onSelectCategory }) {
   const [hoveredIdx, setHoveredIdx] = useState(null);
+  const sectionRef = useRef(null);
 
   const categories = [
     {
@@ -27,14 +28,14 @@ export default function StatsTicker({ onSelectCategory }) {
       category: "Compaction Equipment",
       description: "For a smoother, stronger foundation.",
       image: getAssetUrl("/assets/03.png"),
-      model: getAssetUrl("/assets/tripo_pbr_model_056f077c-e0e5-4fc8-9e06-1e2d0d78fbd2_meshopt.glb")
+      model: getAssetUrl("/assets/tripo_pbr_model_003af8d7-9e6e-4ee6-a122-b9971804e582_meshopt.glb")
     },
     {
       title: "Excavator",
       category: "Excavator",
       description: "Power and precision in every move.",
       image: getAssetUrl("/assets/04.png"),
-      model: getAssetUrl("/assets/tripo_pbr_model_003af8d7-9e6e-4ee6-a122-b9971804e582_meshopt.glb")
+      model: getAssetUrl("/assets/tripo_pbr_model_056f077c-e0e5-4fc8-9e06-1e2d0d78fbd2_meshopt.glb")
     },
     {
       title: "Other Equipment",
@@ -45,14 +46,52 @@ export default function StatsTicker({ onSelectCategory }) {
     }
   ];
 
+  // Automatic high-performance preloading when section approaches the viewport
+  useEffect(() => {
+    const modelUrls = categories.map((c) => c.model).filter(Boolean);
+
+    if (typeof window !== 'undefined' && 'IntersectionObserver' in window && sectionRef.current) {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              preloadAllCategoryModels(modelUrls);
+              observer.disconnect();
+            }
+          });
+        },
+        { rootMargin: '400px' }
+      );
+
+      observer.observe(sectionRef.current);
+      return () => observer.disconnect();
+    } else {
+      preloadAllCategoryModels(modelUrls);
+    }
+  }, []);
+
   const handleCardClick = (category) => {
     if (onSelectCategory) {
       onSelectCategory(category);
     }
   };
 
+  const handleMouseEnterCard = (idx, model) => {
+    setHoveredIdx(idx);
+    if (model) {
+      preloadCategoryModel(model);
+    }
+  };
+
+  const handleTouchCard = (idx, model) => {
+    setHoveredIdx((prev) => (prev === idx ? null : idx));
+    if (model) {
+      preloadCategoryModel(model);
+    }
+  };
+
   return (
-    <section id="company-profile" className="disd-our-products-section">
+    <section id="company-profile" ref={sectionRef} className="disd-our-products-section">
       {/* 1. OUR PRODUCTS: Top Light Section with 5 Cards */}
       <div className="disd-container">
         {/* Two-Column Section Header */}
@@ -80,8 +119,9 @@ export default function StatsTicker({ onSelectCategory }) {
                   key={idx}
                   className={`disd-cat-five-card ${isHovered ? 'is-flipped' : ''}`}
                   onClick={() => handleCardClick(item.category)}
-                  onMouseEnter={() => setHoveredIdx(idx)}
+                  onMouseEnter={() => handleMouseEnterCard(idx, item.model)}
                   onMouseLeave={() => setHoveredIdx(null)}
+                  onTouchStart={() => handleTouchCard(idx, item.model)}
                 >
                   <div className="disd-cat-five-card-inner">
                     {/* FRONT FACE: Clean 2D Product Card */}
@@ -91,8 +131,11 @@ export default function StatsTicker({ onSelectCategory }) {
                           src={item.image}
                           alt={item.title}
                           className="disd-cat-five-img"
-                          loading="lazy"
+                          loading="eager"
                           decoding="async"
+                          fetchPriority={idx < 2 ? 'high' : 'auto'}
+                          width="260"
+                          height="195"
                         />
                       </div>
 
@@ -112,10 +155,6 @@ export default function StatsTicker({ onSelectCategory }) {
                     {/* BACK / REVERSED FACE: 3D Rotating Model */}
                     <div className="disd-cat-five-card-back">
                       <div className="disd-cat-five-back-header">
-                        <span className="disd-cat-five-back-badge">
-                          <span className="disd-cat-five-back-badge-dot" />
-                          3D VIEW
-                        </span>
                         <h3 className="disd-cat-five-back-title">{item.title}</h3>
                       </div>
 
@@ -125,12 +164,12 @@ export default function StatsTicker({ onSelectCategory }) {
                             modelPath={item.model}
                             isHovered={isHovered}
                             title={item.title}
+                            posterImage={item.image}
                           />
                         )}
                       </div>
 
                       <div className="disd-cat-five-back-action">
-                        <span className="disd-cat-five-back-hint">Interactive 360°</span>
                         <div className="disd-cat-five-btn-icon back-active">
                           <ArrowRight size={14} />
                         </div>

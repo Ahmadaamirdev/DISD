@@ -9,6 +9,7 @@ const productSchema = new mongoose.Schema({
     enum: ['Hydraulic Breaker', 'Compaction Equipment', 'Excavator', 'Forklift', 'Attachments', 'Scissor Lift']
   },
   modelNumber: { type: String, required: true },
+  model: { type: String },
   image: { type: String, required: true },
   description: { type: String, required: true },
   specifications: {

@@ -1,16 +1,23 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
 
-// Module-level in-memory cache to prevent re-fetching GLBs across cards & hover re-entries
+// Pre-warm Meshopt WASM decoder immediately on module load
+if (typeof window !== 'undefined' && MeshoptDecoder && MeshoptDecoder.ready) {
+  MeshoptDecoder.ready.catch(() => {});
+}
+
+// Global in-memory cache for parsed GLTF scenes & computed bounding metadata
 const globalModelCache = new Map();
 const globalLoadingPromises = new Map();
 
 /**
- * Pre-fetches and parses a GLB model with MeshoptDecoder, storing the scene in memory.
+ * Pre-fetches and parses a GLB model with MeshoptDecoder, caching the prepared scene.
  */
-async function loadGlbModel(modelPath) {
+export async function loadGlbModel(modelPath) {
+  if (!modelPath) return null;
+
   if (globalModelCache.has(modelPath)) {
     return globalModelCache.get(modelPath);
   }
@@ -20,26 +27,53 @@ async function loadGlbModel(modelPath) {
   }
 
   const promise = (async () => {
-    await MeshoptDecoder.ready;
-    const loader = new GLTFLoader();
-    loader.setMeshoptDecoder(MeshoptDecoder);
+    try {
+      await MeshoptDecoder.ready;
+      const loader = new GLTFLoader();
+      loader.setMeshoptDecoder(MeshoptDecoder);
 
-    return new Promise((resolve, reject) => {
-      loader.load(
-        modelPath,
-        (gltf) => {
-          globalModelCache.set(modelPath, gltf.scene);
-          globalLoadingPromises.delete(modelPath);
-          resolve(gltf.scene);
-        },
-        undefined,
-        (err) => {
-          globalLoadingPromises.delete(modelPath);
-          console.error(`[CategoryCard3DViewer] Failed to load ${modelPath}:`, err);
-          reject(err);
-        }
-      );
-    });
+      return new Promise((resolve, reject) => {
+        loader.load(
+          modelPath,
+          (gltf) => {
+            const rootScene = gltf.scene;
+
+            // Center geometry pivot and calculate base scale once
+            const box = new THREE.Box3().setFromObject(rootScene);
+            const size = new THREE.Vector3();
+            box.getSize(size);
+            const center = new THREE.Vector3();
+            box.getCenter(center);
+
+            rootScene.position.x = -center.x;
+            rootScene.position.y = -center.y;
+            rootScene.position.z = -center.z;
+
+            const maxDim = Math.max(size.x, size.y, size.z) || 1;
+            const targetDim = 1.75;
+            const baseScale = targetDim / maxDim;
+
+            const cachedData = {
+              scene: rootScene,
+              baseScale
+            };
+
+            globalModelCache.set(modelPath, cachedData);
+            globalLoadingPromises.delete(modelPath);
+            resolve(cachedData);
+          },
+          undefined,
+          (err) => {
+            globalLoadingPromises.delete(modelPath);
+            console.error(`[CategoryCard3DViewer] Failed to load ${modelPath}:`, err);
+            reject(err);
+          }
+        );
+      });
+    } catch (err) {
+      globalLoadingPromises.delete(modelPath);
+      throw err;
+    }
   })();
 
   globalLoadingPromises.set(modelPath, promise);
@@ -47,229 +81,260 @@ async function loadGlbModel(modelPath) {
 }
 
 /**
- * Generates a realistic soft radial contact shadow texture for the ground pedestal.
+ * Priority background preloader for individual category models.
  */
-function createContactShadowTexture() {
-  const canvas = document.createElement('canvas');
-  canvas.width = 256;
-  canvas.height = 256;
-  const ctx = canvas.getContext('2d');
-  const cx = 128;
-  const cy = 128;
-
-  // Outer ambient diffusion
-  const outerGrad = ctx.createRadialGradient(cx, cy, 10, cx, cy, 120);
-  outerGrad.addColorStop(0, 'rgba(4, 30, 20, 0.45)');
-  outerGrad.addColorStop(0.4, 'rgba(4, 30, 20, 0.22)');
-  outerGrad.addColorStop(0.7, 'rgba(4, 30, 20, 0.08)');
-  outerGrad.addColorStop(1, 'rgba(4, 30, 20, 0)');
-  ctx.fillStyle = outerGrad;
-  ctx.beginPath();
-  ctx.ellipse(cx, cy, 115, 65, 0, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Tight core contact shadow
-  const coreGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 60);
-  coreGrad.addColorStop(0, 'rgba(2, 18, 12, 0.65)');
-  coreGrad.addColorStop(0.5, 'rgba(2, 18, 12, 0.30)');
-  coreGrad.addColorStop(1, 'rgba(2, 18, 12, 0)');
-  ctx.fillStyle = coreGrad;
-  ctx.beginPath();
-  ctx.ellipse(cx, cy, 65, 38, 0, 0, Math.PI * 2);
-  ctx.fill();
-
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.needsUpdate = true;
-  return texture;
+export async function preloadCategoryModel(modelPath) {
+  if (!modelPath) return;
+  try {
+    return await loadGlbModel(modelPath);
+  } catch (err) {
+    // Gracefully ignore preload error
+  }
 }
 
-export default function CategoryCard3DViewer({ modelPath, isHovered, title = 'Equipment' }) {
+/**
+ * Staggered background preloader for all category models using idle callbacks.
+ */
+export function preloadAllCategoryModels(modelPaths) {
+  if (typeof window === 'undefined' || !Array.isArray(modelPaths)) return;
+
+  let index = 0;
+  const queueNext = () => {
+    if (index >= modelPaths.length) return;
+    const path = modelPaths[index++];
+    if (path) {
+      loadGlbModel(path)
+        .catch(() => {})
+        .finally(() => {
+          if ('requestIdleCallback' in window) {
+            window.requestIdleCallback(queueNext, { timeout: 1500 });
+          } else {
+            setTimeout(queueNext, 300);
+          }
+        });
+    } else {
+      queueNext();
+    }
+  };
+
+  if ('requestIdleCallback' in window) {
+    window.requestIdleCallback(queueNext, { timeout: 2000 });
+  } else {
+    setTimeout(queueNext, 400);
+  }
+}
+
+// Cached shared contact shadow texture & geometry singleton
+let cachedShadowTexture = null;
+let cachedShadowGeo = null;
+let cachedShadowMat = null;
+
+function getSharedContactShadowMesh() {
+  if (!cachedShadowTexture) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 256;
+    canvas.height = 256;
+    const ctx = canvas.getContext('2d');
+    const cx = 128;
+    const cy = 128;
+
+    // Outer ambient diffusion
+    const outerGrad = ctx.createRadialGradient(cx, cy, 10, cx, cy, 120);
+    outerGrad.addColorStop(0, 'rgba(4, 30, 20, 0.45)');
+    outerGrad.addColorStop(0.4, 'rgba(4, 30, 20, 0.22)');
+    outerGrad.addColorStop(0.7, 'rgba(4, 30, 20, 0.08)');
+    outerGrad.addColorStop(1, 'rgba(4, 30, 20, 0)');
+    ctx.fillStyle = outerGrad;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, 115, 65, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Tight core contact shadow
+    const coreGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 60);
+    coreGrad.addColorStop(0, 'rgba(2, 18, 12, 0.65)');
+    coreGrad.addColorStop(0.5, 'rgba(2, 18, 12, 0.30)');
+    coreGrad.addColorStop(1, 'rgba(2, 18, 12, 0)');
+    ctx.fillStyle = coreGrad;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, 65, 38, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    cachedShadowTexture = new THREE.CanvasTexture(canvas);
+    cachedShadowTexture.needsUpdate = true;
+    cachedShadowGeo = new THREE.PlaneGeometry(2.2, 1.2);
+    cachedShadowMat = new THREE.MeshBasicMaterial({
+      map: cachedShadowTexture,
+      transparent: true,
+      opacity: 0.55,
+      depthWrite: false,
+    });
+  }
+
+  const shadowPlane = new THREE.Mesh(cachedShadowGeo, cachedShadowMat);
+  shadowPlane.rotation.x = -Math.PI / 2;
+  shadowPlane.position.y = -0.65;
+  return shadowPlane;
+}
+
+export default function CategoryCard3DViewer({ modelPath, isHovered, title = 'Equipment', posterImage }) {
   const mountRef = useRef(null);
+  const [hasStartedInit, setHasStartedInit] = useState(false);
+  const [isModelReady, setIsModelReady] = useState(false);
   const [isLoading, setIsLoading] = useState(!globalModelCache.has(modelPath));
   const [hasError, setHasError] = useState(false);
 
+  // References for persistent Three.js instances
+  const sceneRef = useRef(null);
+  const cameraRef = useRef(null);
+  const rendererRef = useRef(null);
+  const modelGroupRef = useRef(null);
+  const animFrameRef = useRef(null);
+  const baseScaleRef = useRef(1);
+  const mouseCoordsRef = useRef({ x: 0, y: 0 });
+  const isHoveredRef = useRef(isHovered);
+  isHoveredRef.current = isHovered;
+
+  // Initialize WebGL context on first hover or prewarm
   useEffect(() => {
-    if (!isHovered && !globalModelCache.has(modelPath)) {
-      return;
+    if ((isHovered || globalModelCache.has(modelPath)) && !hasStartedInit) {
+      setHasStartedInit(true);
     }
+  }, [isHovered, modelPath, hasStartedInit]);
+
+  // Set up Three.js Scene and Renderer ONCE per card
+  useEffect(() => {
+    if (!hasStartedInit) return;
 
     const container = mountRef.current;
     if (!container) return;
 
     let isDisposed = false;
-    let animId = null;
 
     // 1. Scene setup
     const scene = new THREE.Scene();
+    sceneRef.current = scene;
 
-    // 2. Camera setup - well-proportioned for card interior
+    // 2. Camera setup
     const width = container.clientWidth || 230;
     const height = container.clientHeight || 220;
     const camera = new THREE.PerspectiveCamera(36, width / height, 0.1, 100);
     camera.position.set(0, 0.3, 3.2);
     camera.lookAt(0, 0, 0);
+    cameraRef.current = camera;
 
-    // 3. Renderer with transparent background & high dynamic range
+    // 3. Renderer with hardware-accelerated settings & capped pixel ratio for performance
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
       alpha: true,
       powerPreference: 'high-performance'
     });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    // Cap pixel ratio to 1.5 to save 50%+ GPU fill-rate on high-DPI screens without visual loss
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
     renderer.setSize(width, height);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.25;
+
     container.appendChild(renderer.domElement);
+    rendererRef.current = renderer;
 
     // 4. Studio Lighting Rig
     const ambientLight = new THREE.AmbientLight(0xffffff, 1.5);
     scene.add(ambientLight);
 
-    // Key light (warm golden industrial highlights)
     const keyLight = new THREE.DirectionalLight(0xfff8ee, 2.6);
     keyLight.position.set(4, 5, 4);
     scene.add(keyLight);
 
-    // Cool fill light (balanced contrast)
     const fillLight = new THREE.DirectionalLight(0xddf2ff, 1.4);
     fillLight.position.set(-4, 3, -2);
     scene.add(fillLight);
 
-    // Strong rim light from above/rear (silhouettes mechanical details)
     const rimLight = new THREE.DirectionalLight(0xffeedd, 1.8);
     rimLight.position.set(0, 4, -3);
     scene.add(rimLight);
 
-    // Subtle bottom bounce light (industrial underglow)
     const bounceLight = new THREE.DirectionalLight(0xff9900, 0.4);
     bounceLight.position.set(0, -3, 2);
     scene.add(bounceLight);
 
-    // 5. Contact Shadow Pedestal
-    const shadowTexture = createContactShadowTexture();
-    const shadowGeo = new THREE.PlaneGeometry(2.2, 1.2);
-    const shadowMat = new THREE.MeshBasicMaterial({
-      map: shadowTexture,
-      transparent: true,
-      opacity: 0.55,
-      depthWrite: false,
-    });
-    const shadowPlane = new THREE.Mesh(shadowGeo, shadowMat);
-    shadowPlane.rotation.x = -Math.PI / 2;
-    shadowPlane.position.y = -0.65;
-    scene.add(shadowPlane);
+    // 5. Shared Contact Shadow Pedestal
+    const shadowMesh = getSharedContactShadowMesh();
+    scene.add(shadowMesh);
 
     // 6. Model Emergence Group
     const modelGroup = new THREE.Group();
+    modelGroup.rotation.x = 0.12;
+    modelGroup.rotation.z = -0.03;
     scene.add(modelGroup);
+    modelGroupRef.current = modelGroup;
 
-    let baseScale = 1;
-    let isModelReady = false;
-
+    // 7. Load or Clone Model from Cache
     loadGlbModel(modelPath)
-      .then((originalScene) => {
-        if (isDisposed) return;
+      .then((cachedData) => {
+        if (isDisposed || !cachedData) return;
 
-        const clone = originalScene.clone(true);
+        const clone = cachedData.scene.clone(true);
+        baseScaleRef.current = cachedData.baseScale || 1;
 
-        // Normalize bounding box & center geometry pivot
-        const box = new THREE.Box3().setFromObject(clone);
-        const size = new THREE.Vector3();
-        box.getSize(size);
-        const center = new THREE.Vector3();
-        box.getCenter(center);
-
-        clone.position.x = -center.x;
-        clone.position.y = -center.y;
-        clone.position.z = -center.z;
-
-        const maxDim = Math.max(size.x, size.y, size.z) || 1;
-        const targetDim = 1.75;
-        baseScale = targetDim / maxDim;
-
-        modelGroup.scale.set(baseScale, baseScale, baseScale);
+        modelGroup.scale.set(baseScaleRef.current, baseScaleRef.current, baseScaleRef.current);
         modelGroup.position.set(0, 0, 0);
-
-        // Base isometric pitch
-        modelGroup.rotation.x = 0.12;
-        modelGroup.rotation.z = -0.03;
-
         modelGroup.add(clone);
-        isModelReady = true;
+
+        setIsModelReady(true);
         setIsLoading(false);
+
+        // Render single frame immediately
+        renderer.render(scene, camera);
       })
       .catch((err) => {
         if (!isDisposed) {
+          console.error('[CategoryCard3DViewer] Model init error:', err);
           setHasError(true);
           setIsLoading(false);
         }
       });
 
-    // 7. Interactive Cursor Parallax
-    let mouseX = 0;
-    let mouseY = 0;
+    // 8. Pointer Tracking (Cached getBoundingClientRect to prevent forced reflows)
     const cardEl = container.closest('.disd-cat-five-card');
+    let cachedRect = null;
+
+    const handlePointerEnter = () => {
+      if (cardEl) {
+        cachedRect = cardEl.getBoundingClientRect();
+      }
+    };
 
     const handlePointerMove = (e) => {
-      if (!cardEl) return;
-      const rect = cardEl.getBoundingClientRect();
-      const normX = ((e.clientX - rect.left) / rect.width) * 2 - 1; // -1 to +1
-      const normY = ((e.clientY - rect.top) / rect.height) * 2 - 1; // -1 to +1
-      mouseX = normX;
-      mouseY = normY;
+      if (!cachedRect && cardEl) {
+        cachedRect = cardEl.getBoundingClientRect();
+      }
+      if (!cachedRect) return;
+
+      const normX = ((e.clientX - cachedRect.left) / cachedRect.width) * 2 - 1;
+      const normY = ((e.clientY - cachedRect.top) / cachedRect.height) * 2 - 1;
+      mouseCoordsRef.current.x = normX;
+      mouseCoordsRef.current.y = normY;
     };
 
     const handlePointerLeave = () => {
-      mouseX = 0;
-      mouseY = 0;
+      mouseCoordsRef.current.x = 0;
+      mouseCoordsRef.current.y = 0;
+      cachedRect = null;
     };
 
     if (cardEl) {
+      cardEl.addEventListener('pointerenter', handlePointerEnter);
       cardEl.addEventListener('pointermove', handlePointerMove);
       cardEl.addEventListener('pointerleave', handlePointerLeave);
     }
 
-    // 8. Dynamic Emergence & Rotation Loop
-    let lastTime = performance.now();
-    let emergenceProgress = isHovered ? 0 : 0;
-
-    const animate = (now) => {
-      if (isDisposed) return;
-      animId = requestAnimationFrame(animate);
-
-      const delta = Math.min((now - lastTime) / 1000, 0.1);
-      lastTime = now;
-
-      if (isModelReady) {
-        // Continuous smooth auto-rotation on Y
-        modelGroup.rotation.y += 0.95 * delta;
-
-        // Mouse Parallax tilt
-        const targetTiltX = 0.12 + mouseY * -0.22;
-        const targetTiltZ = -0.03 + mouseX * -0.15;
-        modelGroup.rotation.x += (targetTiltX - modelGroup.rotation.x) * Math.min(delta * 8, 1);
-        modelGroup.rotation.z += (targetTiltZ - modelGroup.rotation.z) * Math.min(delta * 8, 1);
-
-        modelGroup.scale.set(baseScale, baseScale, baseScale);
-        modelGroup.position.set(0, 0, 0);
-      }
-
-      renderer.render(scene, camera);
-    };
-
-    if (isHovered) {
-      animId = requestAnimationFrame(animate);
-    } else {
-      // Single resting render
-      renderer.render(scene, camera);
-    }
-
-    // 9. Resize observer / handling
+    // 9. Resize Handling
     const handleResize = () => {
-      if (!container || isDisposed) return;
-      const newW = container.clientWidth || 280;
-      const newH = container.clientHeight || 260;
+      if (!container || isDisposed || !renderer || !camera) return;
+      cachedRect = null;
+      const newW = container.clientWidth || 230;
+      const newH = container.clientHeight || 220;
       camera.aspect = newW / newH;
       camera.updateProjectionMatrix();
       renderer.setSize(newW, newH);
@@ -278,25 +343,93 @@ export default function CategoryCard3DViewer({ modelPath, isHovered, title = 'Eq
 
     window.addEventListener('resize', handleResize);
 
-    // Cleanup
+    // Initial render
+    renderer.render(scene, camera);
+
+    // Component Unmount Cleanup (Only when card component itself is removed from DOM)
     return () => {
       isDisposed = true;
       window.removeEventListener('resize', handleResize);
       if (cardEl) {
+        cardEl.removeEventListener('pointerenter', handlePointerEnter);
         cardEl.removeEventListener('pointermove', handlePointerMove);
         cardEl.removeEventListener('pointerleave', handlePointerLeave);
       }
-      if (animId) cancelAnimationFrame(animId);
-
+      if (animFrameRef.current) {
+        cancelAnimationFrame(animFrameRef.current);
+      }
       if (renderer.domElement && container.contains(renderer.domElement)) {
         container.removeChild(renderer.domElement);
       }
-      shadowTexture.dispose();
-      shadowGeo.dispose();
-      shadowMat.dispose();
       renderer.dispose();
     };
-  }, [modelPath, isHovered]);
+  }, [hasStartedInit, modelPath]);
+
+  // High-performance animation loop: strictly active only when hovered
+  useEffect(() => {
+    if (!hasStartedInit) return;
+
+    let lastTime = performance.now();
+
+    const animate = (now) => {
+      // If no longer hovered, pause loop immediately (zero CPU/GPU consumption)
+      if (!isHoveredRef.current) {
+        animFrameRef.current = null;
+        return;
+      }
+
+      animFrameRef.current = requestAnimationFrame(animate);
+
+      const delta = Math.min((now - lastTime) / 1000, 0.1);
+      lastTime = now;
+
+      const modelGroup = modelGroupRef.current;
+      const renderer = rendererRef.current;
+      const scene = sceneRef.current;
+      const camera = cameraRef.current;
+
+      if (modelGroup && renderer && scene && camera) {
+        // Continuous smooth auto-rotation on Y
+        modelGroup.rotation.y += 0.95 * delta;
+
+        // Smooth cursor parallax tilt
+        const mouseX = mouseCoordsRef.current.x;
+        const mouseY = mouseCoordsRef.current.y;
+        const targetTiltX = 0.12 + mouseY * -0.22;
+        const targetTiltZ = -0.03 + mouseX * -0.15;
+
+        modelGroup.rotation.x += (targetTiltX - modelGroup.rotation.x) * Math.min(delta * 8, 1);
+        modelGroup.rotation.z += (targetTiltZ - modelGroup.rotation.z) * Math.min(delta * 8, 1);
+
+        const baseScale = baseScaleRef.current;
+        modelGroup.scale.set(baseScale, baseScale, baseScale);
+
+        renderer.render(scene, camera);
+      }
+    };
+
+    if (isHovered) {
+      if (!animFrameRef.current) {
+        animFrameRef.current = requestAnimationFrame(animate);
+      }
+    } else {
+      if (animFrameRef.current) {
+        cancelAnimationFrame(animFrameRef.current);
+        animFrameRef.current = null;
+      }
+      // Render resting frame
+      if (rendererRef.current && sceneRef.current && cameraRef.current) {
+        rendererRef.current.render(sceneRef.current, cameraRef.current);
+      }
+    }
+
+    return () => {
+      if (animFrameRef.current) {
+        cancelAnimationFrame(animFrameRef.current);
+        animFrameRef.current = null;
+      }
+    };
+  }, [isHovered, hasStartedInit]);
 
   if (hasError) {
     return null;
@@ -307,7 +440,28 @@ export default function CategoryCard3DViewer({ modelPath, isHovered, title = 'Eq
       className={`disd-card-3d-viewer ${isHovered ? 'active' : ''}`}
       aria-label={`${title} 3D interactive viewer`}
     >
-      <div ref={mountRef} className="disd-card-3d-canvas-wrap" />
+      {/* Instant 2D Silhouette Poster Backdrop: Prevents blank space while model prepares */}
+      {posterImage && (
+        <div className={`disd-card-3d-poster-wrap ${isModelReady ? 'fade-out' : 'visible'}`}>
+          <img
+            src={posterImage}
+            alt={title}
+            className="disd-card-3d-poster-img"
+            loading="eager"
+            decoding="async"
+            width="220"
+            height="180"
+          />
+        </div>
+      )}
+
+      {/* Persistent Canvas Container */}
+      <div
+        ref={mountRef}
+        className={`disd-card-3d-canvas-wrap ${isModelReady ? 'ready' : 'hidden'}`}
+      />
+
+      {/* Polished loading spinner */}
       {isLoading && isHovered && (
         <div className="disd-card-3d-spinner-wrap">
           <div className="disd-card-3d-spinner" />
