@@ -57,17 +57,23 @@ export default function PillNav({
   // Detect scroll to transition from transparent on hero to colored on scroll (RAF throttled)
   useEffect(() => {
     let ticking = false;
+    let lastScrolled = window.scrollY > 40;
+    setIsScrolled(lastScrolled);
+
     const handleScroll = () => {
       if (!ticking) {
+        ticking = true;
         window.requestAnimationFrame(() => {
           const scrolled = window.scrollY > 40;
-          setIsScrolled((prev) => (prev !== scrolled ? scrolled : prev));
+          if (scrolled !== lastScrolled) {
+            lastScrolled = scrolled;
+            setIsScrolled(scrolled);
+          }
           ticking = false;
         });
-        ticking = true;
       }
     };
-    handleScroll();
+
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -100,7 +106,7 @@ export default function PillNav({
         updatePillPosition(hoveredIndex);
       }
     };
-    window.addEventListener('resize', handleResize);
+    window.addEventListener('resize', handleResize, { passive: true });
     return () => window.removeEventListener('resize', handleResize);
   }, [hoveredIndex]);
 

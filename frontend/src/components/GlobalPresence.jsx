@@ -56,6 +56,10 @@ export default function GlobalPresence() {
                     src={item.image} 
                     alt={item.title} 
                     className="disd-explore-img"
+                    loading="lazy"
+                    decoding="async"
+                    width="380"
+                    height="220"
                   />
                 </div>
 

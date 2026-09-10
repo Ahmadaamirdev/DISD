@@ -324,9 +324,9 @@ export default function CategoryCard3DViewer({ modelPath, isHovered, title = 'Eq
     };
 
     if (cardEl) {
-      cardEl.addEventListener('pointerenter', handlePointerEnter);
-      cardEl.addEventListener('pointermove', handlePointerMove);
-      cardEl.addEventListener('pointerleave', handlePointerLeave);
+      cardEl.addEventListener('pointerenter', handlePointerEnter, { passive: true });
+      cardEl.addEventListener('pointermove', handlePointerMove, { passive: true });
+      cardEl.addEventListener('pointerleave', handlePointerLeave, { passive: true });
     }
 
     // 9. Resize Handling
@@ -341,7 +341,7 @@ export default function CategoryCard3DViewer({ modelPath, isHovered, title = 'Eq
       renderer.render(scene, camera);
     };
 
-    window.addEventListener('resize', handleResize);
+    window.addEventListener('resize', handleResize, { passive: true });
 
     // Initial render
     renderer.render(scene, camera);

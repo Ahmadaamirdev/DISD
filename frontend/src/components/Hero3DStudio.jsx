@@ -579,7 +579,7 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
       updateCardPositions();
     };
 
-    window.addEventListener('resize', handleResize);
+    window.addEventListener('resize', handleResize, { passive: true });
     const resizeObserver = new ResizeObserver(handleResize);
     resizeObserver.observe(container);
 
@@ -592,7 +592,7 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
         controls.update();
       }
     };
-    canvas.addEventListener('pointerdown', handlePointerDown);
+    canvas.addEventListener('pointerdown', handlePointerDown, { passive: true });
 
     // 10. High-Performance Render Loop with Zero DOM Reflows & 60 FPS Camera Controls
     const tempVec = new THREE.Vector3();

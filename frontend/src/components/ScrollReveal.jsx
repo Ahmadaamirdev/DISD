@@ -1,5 +1,35 @@
 import React, { useEffect, useRef, useState } from 'react';
 
+// Singleton IntersectionObserver to share across all ScrollReveal instances
+// drastically minimizes CPU/memory usage, garbage collection, and event loop overhead
+const callbacks = new Map();
+let sharedObserver = null;
+
+function getSharedObserver() {
+  if (typeof window === 'undefined' || !('IntersectionObserver' in window)) return null;
+  if (!sharedObserver) {
+    sharedObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const cb = callbacks.get(entry.target);
+            if (cb) {
+              cb();
+              callbacks.delete(entry.target);
+              sharedObserver.unobserve(entry.target);
+            }
+          }
+        });
+      },
+      {
+        threshold: 0.05,
+        rootMargin: '0px 0px 80px 0px'
+      }
+    );
+  }
+  return sharedObserver;
+}
+
 export default function ScrollReveal({
   children,
   animation = 'fade-up',
@@ -14,32 +44,34 @@ export default function ScrollReveal({
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          if (domRef.current) {
-            observer.unobserve(domRef.current);
-          }
-        }
-      },
-      {
-        threshold,
-        rootMargin: '0px 0px 60px 0px'
-      }
-    );
+    const el = domRef.current;
+    if (!el) return;
 
-    const currentElem = domRef.current;
-    if (currentElem) {
-      observer.observe(currentElem);
+    // Fast check: if element is already within viewport on mount, reveal immediately
+    const rect = el.getBoundingClientRect();
+    if (rect.top < window.innerHeight && rect.bottom > 0) {
+      setIsVisible(true);
+      return;
     }
 
+    const observer = getSharedObserver();
+    if (!observer) {
+      setIsVisible(true);
+      return;
+    }
+
+    callbacks.set(el, () => {
+      setIsVisible(true);
+    });
+    observer.observe(el);
+
     return () => {
-      if (currentElem) {
-        observer.unobserve(currentElem);
+      callbacks.delete(el);
+      if (observer) {
+        observer.unobserve(el);
       }
     };
-  }, [threshold]);
+  }, []);
 
   const animationClass = `disd-reveal-${animation}`;
   const statusClass = isVisible ? 'disd-reveal-visible' : 'disd-reveal-hidden';
