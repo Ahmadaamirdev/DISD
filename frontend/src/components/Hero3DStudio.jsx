@@ -200,7 +200,8 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
       };
     }
 
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.35));
+    const isMobileDevice = typeof window !== 'undefined' && (window.innerWidth < 1024 || window.matchMedia('(pointer: coarse)').matches);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobileDevice ? 1.0 : 1.35));
     renderer.setSize(getWidth(), getHeight(), false);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.14;
@@ -252,8 +253,9 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
     const keyLight = new THREE.DirectionalLight(0xfff6ec, 2.6);
     keyLight.position.set(-4.5, 6.2, 4.5);
     keyLight.castShadow = true;
-    keyLight.shadow.mapSize.width = 1024;
-    keyLight.shadow.mapSize.height = 1024;
+    const shadowMapDim = isMobileDevice ? 512 : 1024;
+    keyLight.shadow.mapSize.width = shadowMapDim;
+    keyLight.shadow.mapSize.height = shadowMapDim;
     keyLight.shadow.camera.near = 0.5;
     keyLight.shadow.camera.far = 25;
     keyLight.shadow.camera.left = -4.5;
@@ -261,7 +263,7 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
     keyLight.shadow.camera.top = 4.5;
     keyLight.shadow.camera.bottom = -1.5;
     keyLight.shadow.bias = -0.0001;
-    keyLight.shadow.radius = 3;
+    keyLight.shadow.radius = isMobileDevice ? 2 : 3;
     scene.add(keyLight);
 
     const fillLight = new THREE.DirectionalLight(0xede6dc, 0.95);
@@ -447,7 +449,7 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
           isIntroActive = false;
         } else {
           if (isInitial) {
-            setRevealPhase(8);
+            setRevealPhase(2);
             setTimeout(() => { updateCardPositions(); }, 50);
 
             if (onModelLoaded) {
@@ -535,6 +537,15 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
       introStartTime = now;
       isIntroActive = true;
       modelTransitionStartTime = now;
+
+      revealTimers.forEach(clearTimeout);
+      revealTimers.length = 0;
+
+      // Silky, lightweight staggered UI emergence synchronized with preloader dissolve
+      setRevealPhase(2);
+      revealTimers.push(setTimeout(() => setRevealPhase(4), 180));
+      revealTimers.push(setTimeout(() => setRevealPhase(8), 460));
+      revealTimers.push(setTimeout(() => updateCardPositions(), 520));
     };
 
     loadProductModel(selectedProductId, true);
@@ -606,27 +617,47 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
     let frameCounter = 0;
 
     let isVisible = true;
+    let isTabVisible = typeof document !== 'undefined' ? !document.hidden : true;
+
+    const checkAndResume = () => {
+      if (isVisible && isTabVisible && !animationFrameId && !isDisposed) {
+        animate();
+      }
+    };
+
+    const pauseAnimation = () => {
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+      }
+    };
+
     const visibilityObserver = new IntersectionObserver(
       ([entry]) => {
         const wasVisible = isVisible;
         isVisible = entry.isIntersecting;
         if (isVisible && !wasVisible) {
-          if (!animationFrameId && !isDisposed) {
-            animate();
-          }
+          checkAndResume();
         } else if (!isVisible && wasVisible) {
-          if (animationFrameId) {
-            cancelAnimationFrame(animationFrameId);
-            animationFrameId = null;
-          }
+          pauseAnimation();
         }
       },
       { threshold: 0 }
     );
     visibilityObserver.observe(container);
 
+    const handleDocVisibilityChange = () => {
+      isTabVisible = !document.hidden;
+      if (isTabVisible) {
+        checkAndResume();
+      } else {
+        pauseAnimation();
+      }
+    };
+    document.addEventListener('visibilitychange', handleDocVisibilityChange);
+
     const animate = () => {
-      if (!isVisible || isDisposed) {
+      if (!isVisible || !isTabVisible || isDisposed) {
         animationFrameId = null;
         return;
       }
@@ -713,8 +744,8 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
       // Render 3D scene smoothly
       renderer.render(scene, camera);
 
-      // Dynamic 3D Anchor Projection: Uses CACHED card coordinates & CACHED DOM elements
-      if (loadedModel && svgRef.current) {
+      // Dynamic 3D Anchor Projection: Uses CACHED card coordinates & CACHED DOM elements (Desktop only)
+      if (loadedModel && svgRef.current && !isMobile) {
         const width = getWidth();
         const height = getHeight();
         const currentSpecs = activeSpecsRef.current || specifications;
@@ -779,6 +810,7 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
 
     return () => {
       isDisposed = true;
+      document.removeEventListener('visibilitychange', handleDocVisibilityChange);
       triggerIntroRef.current = null;
       visibilityObserver.disconnect();
       revealTimers.forEach((t) => clearTimeout(t));

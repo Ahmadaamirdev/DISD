@@ -1,11 +1,10 @@
 import { useEffect } from 'react';
 
 /**
- * Professional Smooth Scroll Momentum Controller
- * - Dampens harsh mouse wheel jumps into a silky, weighted glide
- * - Gives entrance animations and section reveals ample time to unfold gracefully
- * - Automatically detects modals to allow internal scrolling
- * - Preserves native scrollbar dragging and trackpad precision
+ * Lightweight Hardware-Accelerated Smooth Scroll Hook
+ * - Uses native compositor-driven smooth scrolling
+ * - Eliminates wheel event hijacking, input lag, and layout thrashing
+ * - Respects prefers-reduced-motion accessibility preferences
  */
 export default function useSmoothScroll() {
   useEffect(() => {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, Suspense, lazy } from 'react';
 import Navbar from './components/Navbar.jsx';
 import Hero from './components/Hero.jsx';
 import StatsTicker from './components/StatsTicker.jsx';
@@ -10,7 +10,9 @@ import Footer from './components/Footer.jsx';
 import SectionDivider from './components/SectionDivider.jsx';
 import SitePreloader from './components/SitePreloader.jsx';
 import useSmoothScroll from './hooks/useSmoothScroll.js';
-import ChatWidget from './components/ChatWidget.jsx';
+
+// Defer non-critical ChatWidget and its 157kB asset off the initial rendering path
+const ChatWidget = lazy(() => import('./components/ChatWidget.jsx'));
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -99,7 +101,13 @@ export default function App() {
         />
       )}
 
-      <div className="min-h-screen bg-white text-gray-900 font-sans flex flex-col">
+      <div 
+        className="min-h-screen bg-white text-gray-900 font-sans flex flex-col"
+        style={{
+          opacity: isSiteReady ? 1 : 0.85,
+          transition: 'opacity 0.85s cubic-bezier(0.22, 1, 0.36, 1)',
+        }}
+      >
         {/* 1. Header / Navigation with Hero Dark Backdrop for Transparent Effect */}
         <div style={{ backgroundColor: '#211F1C', position: 'sticky', top: 0, zIndex: 1000 }}>
           <Navbar 
@@ -157,8 +165,12 @@ export default function App() {
         {/* 8. Footer */}
         <Footer />
 
-        {/* 9. AI Assistant Chat Widget - hidden during loading animation */}
-        {!showPreloader && <ChatWidget />}
+        {/* 9. AI Assistant Chat Widget - deferred and loaded in background */}
+        {!showPreloader && (
+          <Suspense fallback={null}>
+            <ChatWidget />
+          </Suspense>
+        )}
       </div>
     </ErrorBoundary>
   );

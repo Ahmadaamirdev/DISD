@@ -194,12 +194,16 @@ export default function CategoryCard3DViewer({ modelPath, isHovered, title = 'Eq
   const isHoveredRef = useRef(isHovered);
   isHoveredRef.current = isHovered;
 
-  // Initialize WebGL context on first hover or prewarm
+  // Initialize WebGL context strictly on desktop user hover (avoids 5 concurrent contexts & mobile crashes)
   useEffect(() => {
-    if ((isHovered || globalModelCache.has(modelPath)) && !hasStartedInit) {
+    if (typeof window === 'undefined') return;
+    const isTouchOrMobile = window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 1024;
+    if (isTouchOrMobile) return; // Touch & mobile devices use the optimized poster image with zero WebGL overhead
+
+    if (isHovered && !hasStartedInit) {
       setHasStartedInit(true);
     }
-  }, [isHovered, modelPath, hasStartedInit]);
+  }, [isHovered, hasStartedInit]);
 
   // Set up Three.js Scene and Renderer ONCE per card
   useEffect(() => {

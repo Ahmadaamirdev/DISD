@@ -56,6 +56,7 @@ export default function EngineeringAdvantage() {
         loop
         muted
         playsInline
+        preload="metadata"
       >
         <source src={getAssetUrl('chisel_explode_video.mp4')} type="video/mp4" />
         <source src={getAssetUrl('hero_video.mp4')} type="video/mp4" />

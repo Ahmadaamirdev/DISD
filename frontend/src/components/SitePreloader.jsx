@@ -14,8 +14,8 @@ import { getAssetUrl } from '../data/cloudinaryAssets';
 export default function SitePreloader({ isModelLoaded = false, onStartExit, onComplete }) {
   const [isExiting, setIsExiting] = useState(false);
   const startTimeRef = useRef(Date.now());
-  const MIN_DURATION = 1200; // Fast 1.2s brand presentation
-  const MAX_WAIT = 3500; // Safety timeout
+  const MIN_DURATION = 3200; // 3.2s cinematic presentation duration
+  const MAX_WAIT = 4000; // 4.0s safety limit
 
   const bgAmbientUrl = getAssetUrl('loader_bg_ambient.png');
   const ringUrl = getAssetUrl('loader_ring_exact.png');
@@ -38,7 +38,7 @@ export default function SitePreloader({ isModelLoaded = false, onStartExit, onCo
         setTimeout(() => {
           document.body.style.overflow = originalOverflow;
           if (onComplete) onComplete();
-        }, 650);
+        }, 850);
       }
     }, 100);
 
@@ -64,11 +64,9 @@ export default function SitePreloader({ isModelLoaded = false, onStartExit, onCo
         alignItems: 'center',
         justifyContent: 'center',
         opacity: isExiting ? 0 : 1,
-        transform: isExiting ? 'scale(1.03)' : 'scale(1)',
         pointerEvents: isExiting ? 'none' : 'all',
-        transition: 'opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), transform 0.65s cubic-bezier(0.16, 1, 0.3, 1)',
+        transition: 'opacity 0.85s cubic-bezier(0.22, 1, 0.36, 1)',
         userSelect: 'none',
-        willChange: 'opacity, transform',
         overflow: 'hidden',
         contain: 'strict',
       }}
@@ -83,6 +81,9 @@ export default function SitePreloader({ isModelLoaded = false, onStartExit, onCo
           alignItems: 'center',
           justifyContent: 'center',
           zIndex: 2,
+          opacity: isExiting ? 0 : 1,
+          transform: isExiting ? 'scale(0.97)' : 'scale(1)',
+          transition: 'opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1), transform 0.65s cubic-bezier(0.22, 1, 0.36, 1)',
           contain: 'layout style paint',
         }}
       >

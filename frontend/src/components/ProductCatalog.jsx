@@ -1,9 +1,11 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, Suspense, lazy } from 'react';
 import { initialProducts, equipmentCategories } from '../data/productsData.js';
-import ProductDetailModal from './ProductDetailModal.jsx';
 import { ArrowUpRight, ChevronRight } from 'lucide-react';
 import ScrollReveal from './ScrollReveal.jsx';
 import { getAssetUrl } from '../data/cloudinaryAssets.js';
+
+// Lazy-load modal only when a user requests details
+const ProductDetailModal = lazy(() => import('./ProductDetailModal.jsx'));
 
 export default function ProductCatalog({ selectedCategory: propCategory, onSelectForQuote }) {
   const [allProducts, setAllProducts] = useState(initialProducts);
@@ -186,11 +188,13 @@ export default function ProductCatalog({ selectedCategory: propCategory, onSelec
 
       {/* Technical Spec Sheet Modal */}
       {activeModalProduct && (
-        <ProductDetailModal
-          product={activeModalProduct}
-          onClose={() => setActiveModalProduct(null)}
-          onSelectForQuote={onSelectForQuote}
-        />
+        <Suspense fallback={null}>
+          <ProductDetailModal
+            product={activeModalProduct}
+            onClose={() => setActiveModalProduct(null)}
+            onSelectForQuote={onSelectForQuote}
+          />
+        </Suspense>
       )}
     </section>
   );

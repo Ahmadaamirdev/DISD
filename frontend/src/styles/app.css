@@ -1,4 +1,4 @@
-﻿/* ==========================================================================
+/* ==========================================================================
    Dragon International Services & Development LLC (DISD)
    Enterprise Light Corporate Stylesheet - Guaranteed Failproof CSS
    ========================================================================== */
@@ -2328,7 +2328,7 @@ textarea {
   transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.disd-reveal-hidden { will-change: opacity, transform; }
+.disd-reveal-hidden { will-change: auto; }
 
 .disd-reveal-hidden.disd-reveal-fade-up    { opacity: 0; transform: translateY(30px); }
 .disd-reveal-hidden.disd-reveal-fade-left  { opacity: 0; transform: translateX(-26px); }
@@ -2374,3 +2374,31 @@ textarea {
   .disd-hero-copy,
   .disd-hero-model-stage          { animation: none; opacity: 1; transform: none; }
 }
+
+/* Cross-Device Performance Optimizations: Skip off-screen rendering until scrolled near */
+#products,
+#applications,
+#global-presence,
+#quote-estimator {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 700px;
+}
+
+/* Mobile Compositor Optimization: Replace costly multi-pass GPU blur with crisp fast surfaces */
+@media (max-width: 768px) {
+  .disd-why-us-card {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background-color: rgba(6, 32, 24, 0.92) !important;
+  }
+  .disd-why-us-icon-box {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+  .disd-media-banner {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background-color: #FFFFFF !important;
+  }
+}
+
