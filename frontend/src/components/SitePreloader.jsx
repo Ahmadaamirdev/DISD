@@ -14,8 +14,8 @@ import { getAssetUrl } from '../data/cloudinaryAssets';
 export default function SitePreloader({ isModelLoaded = false, onStartExit, onComplete }) {
   const [isExiting, setIsExiting] = useState(false);
   const startTimeRef = useRef(Date.now());
-  const MIN_DURATION = 3200; // 3.2s minimum duration for cinematic brand presentation
-  const MAX_WAIT = 5500; // Safety timeout
+  const MIN_DURATION = 1200; // Fast 1.2s brand presentation
+  const MAX_WAIT = 3500; // Safety timeout
 
   const bgAmbientUrl = getAssetUrl('loader_bg_ambient.png');
   const ringUrl = getAssetUrl('loader_ring_exact.png');
