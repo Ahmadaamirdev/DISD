@@ -15,6 +15,7 @@ import HeroSpecification from './hero/HeroSpecification.jsx';
 import HeroSpecificationMarker from './hero/HeroSpecificationMarker.jsx';
 import HeroSpecificationConnector from './hero/HeroSpecificationConnector.jsx';
 import { getAssetUrl } from '../data/cloudinaryAssets';
+import { getDeviceTier } from '../utils/deviceTier.js';
 
 const MODEL_PATH = getAssetUrl('/assets/tripo_pbr_model_4be6fa61-73bb-4da0-b263-fd93bf51e0cc_meshopt.glb');
 
@@ -87,6 +88,8 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
 
   // Carefully Timed 8-Phase Reveal Sequence
   const [revealPhase, setRevealPhase] = useState(0);
+  const [isModelReady, setIsModelReady] = useState(false);
+  const deviceTier = getDeviceTier();
 
   // Accessibility: prefers-reduced-motion
   const [reducedMotion, setReducedMotion] = useState(false);
@@ -128,6 +131,7 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
     const nextId = selectedProductId === 'breaker' ? 'forklift' : 'breaker';
     setActiveHoverId(null);
     setIsCrossfading(true);
+    setIsModelReady(false);
 
     setTimeout(() => {
       setSelectedProductId(nextId);
@@ -167,10 +171,11 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
     const initialCamPos = new THREE.Vector3(0, 2.1, 5.6);
     camera.position.copy(initialCamPos);
 
-    // Context loss prevention: Prevent default so browser does not permanently block WebGL context
+    // Context loss prevention: Prevent default and fall back smoothly to poster image
     const handleContextLost = (e) => {
       e.preventDefault();
-      console.warn('WebGL context lost. Rendering loop paused gracefully.');
+      console.warn('WebGL context lost. Falling back to high-res poster gracefully.');
+      setIsModelReady(false);
       if (animationFrameId) cancelAnimationFrame(animationFrameId);
     };
     const handleContextRestored = () => {
@@ -180,12 +185,12 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
     canvas.addEventListener('webglcontextlost', handleContextLost, false);
     canvas.addEventListener('webglcontextrestored', handleContextRestored, false);
 
-    // 3. WebGL Renderer with ACES Tone Mapping & High-Performance Shadows
+    // 3. WebGL Renderer with ACES Tone Mapping & Adaptive Hardware Capabilities
     let renderer;
     try {
       renderer = new THREE.WebGLRenderer({
         canvas,
-        antialias: true,
+        antialias: deviceTier.tier !== 'low',
         alpha: true,
         powerPreference: 'high-performance',
       });
@@ -193,6 +198,7 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
       console.warn('WebGL context creation failed:', err);
       setWebglUnavailable(true);
       setIsLoading(false);
+      setIsModelReady(false);
       setRevealPhase(8);
       return () => {
         canvas.removeEventListener('webglcontextlost', handleContextLost);
@@ -200,26 +206,33 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
       };
     }
 
-    const isMobileDevice = typeof window !== 'undefined' && (window.innerWidth < 1024 || window.matchMedia('(pointer: coarse)').matches);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobileDevice ? 1.0 : 1.35));
+    const isMobileDevice = deviceTier.isMobile;
+    renderer.setPixelRatio(deviceTier.maxPixelRatio);
     renderer.setSize(getWidth(), getHeight(), false);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.14;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFShadowMap;
+    
+    // Adaptive Dynamic Shadows: Enabled only on high-tier hardware.
+    // Medium/Low tiers use the soft contact shadow plane below the machine at 0 GPU cost!
+    renderer.shadowMap.enabled = deviceTier.enableShadows;
+    if (deviceTier.enableShadows) {
+      renderer.shadowMap.type = THREE.PCFShadowMap;
+    }
 
     // 4. Studio Reflection Environment (subtle sheen without blue tint)
     let pmremGenerator;
     let envTexture;
-    try {
-      pmremGenerator = new THREE.PMREMGenerator(renderer);
-      pmremGenerator.compileEquirectangularShader();
-      envTexture = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
-      scene.environment = envTexture;
-      scene.environmentIntensity = 0.40;
-    } catch (pmremErr) {
-      console.warn('PMREM environment generation skipped:', pmremErr);
+    if (deviceTier.enablePMREM) {
+      try {
+        pmremGenerator = new THREE.PMREMGenerator(renderer);
+        pmremGenerator.compileEquirectangularShader();
+        envTexture = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
+        scene.environment = envTexture;
+        scene.environmentIntensity = 0.40;
+      } catch (pmremErr) {
+        console.warn('PMREM environment generation skipped:', pmremErr);
+      }
     }
 
     // 5. Seamless Dark Charcoal Studio Floor
@@ -252,7 +265,7 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
     // 6. Professional Three-Point Product Photography Lighting Rig
     const keyLight = new THREE.DirectionalLight(0xfff6ec, 2.6);
     keyLight.position.set(-4.5, 6.2, 4.5);
-    keyLight.castShadow = true;
+    keyLight.castShadow = deviceTier.enableShadows;
     const shadowMapDim = isMobileDevice ? 512 : 1024;
     keyLight.shadow.mapSize.width = shadowMapDim;
     keyLight.shadow.mapSize.height = shadowMapDim;
@@ -438,6 +451,7 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
         }
 
         setIsLoading(false);
+        setIsModelReady(true);
 
         // Staggered reveal sequence synchronized with model presentation
         revealTimers.forEach(clearTimeout);
@@ -460,20 +474,23 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
               triggerIntroRef.current();
             }
 
-            // Background preload alternate model so switcher is instantaneous
-            setTimeout(() => {
-              const altId = prodId === 'breaker' ? 'forklift' : 'breaker';
-              const altConfig = heroProducts[altId];
-              if (altConfig && !modelCache[altId] && !isDisposed) {
-                const preloader = new GLTFLoader();
-                preloader.setMeshoptDecoder(MeshoptDecoder);
-                preloader.load(altConfig.modelPath, (gltf) => {
-                  if (!isDisposed) {
-                    modelCache[altId] = gltf.scene;
-                  }
-                });
-              }
-            }, 800);
+            // Background preload alternate model ONLY on high tier hardware when browser is idle
+            if (deviceTier.preloadAlternateModel) {
+              const schedulePreload = window.requestIdleCallback || ((cb) => setTimeout(cb, 4000));
+              schedulePreload(() => {
+                const altId = prodId === 'breaker' ? 'forklift' : 'breaker';
+                const altConfig = heroProducts[altId];
+                if (altConfig && !modelCache[altId] && !isDisposed) {
+                  const preloader = new GLTFLoader();
+                  preloader.setMeshoptDecoder(MeshoptDecoder);
+                  preloader.load(altConfig.modelPath, (gltf) => {
+                    if (!isDisposed) {
+                      modelCache[altId] = gltf.scene;
+                    }
+                  });
+                }
+              });
+            }
           } else {
             setRevealPhase(8);
             controls.enabled = true;
@@ -500,6 +517,31 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
           prodConfig.modelPath,
           (gltf) => {
             if (isDisposed) return;
+
+            // Texture safety & memory optimization for average GPUs
+            try {
+              const maxAniso = renderer ? Math.min(renderer.capabilities.getMaxAnisotropy() || 1, 4) : 1;
+              gltf.scene.traverse((child) => {
+                if (child.isMesh) {
+                  if (!deviceTier.enableShadows) {
+                    child.castShadow = false;
+                    child.receiveShadow = false;
+                  }
+                  if (child.material) {
+                    const mats = Array.isArray(child.material) ? child.material : [child.material];
+                    mats.forEach((mat) => {
+                      if (mat.map) {
+                        mat.map.anisotropy = maxAniso;
+                        mat.map.minFilter = THREE.LinearMipmapLinearFilter;
+                      }
+                    });
+                  }
+                }
+              });
+            } catch {
+              // Ignore traversal error
+            }
+
             modelCache[prodId] = gltf.scene;
             setupAndDisplayModel(gltf.scene);
           },
@@ -511,8 +553,9 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
           },
           (err) => {
             console.error('Error loading GLB:', err);
-            setErrorMsg(`Failed to load ${prodConfig.product?.name || 'model'}.`);
             setIsLoading(false);
+            setIsModelReady(false);
+            // Graceful degradation: do not show scary red error banner; keep high-res poster visual active!
             if (isInitial && onModelLoaded) {
               onModelLoaded();
             }
@@ -947,7 +990,50 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
           innerRef={bgTextRef}
         />
 
-        {/* 2. THREE.JS 3D CANVAS (Continuous WebGL Canvas, zIndex 2) */}
+        {/* 1.5 POSTER-FIRST FALLBACK & PRELOAD VISUAL (zIndex 2) */}
+        <div
+          className="disd-hero-poster-wrapper"
+          style={{
+            position: 'absolute',
+            inset: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            pointerEvents: 'none',
+            zIndex: 2,
+            opacity: isModelReady ? 0 : (revealPhase >= 1 ? 1 : 0),
+            transition: 'opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1)',
+          }}
+        >
+          <div
+            style={{
+              position: 'relative',
+              width: 'min(90vw, 560px)',
+              height: 'min(50vh, 440px)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginTop: '-2vh',
+            }}
+          >
+            {activeProduct.posterImage && (
+              <img
+                src={activeProduct.posterImage}
+                alt={product.name}
+                style={{
+                  maxHeight: '100%',
+                  maxWidth: '100%',
+                  objectFit: 'contain',
+                  filter: 'drop-shadow(0 20px 30px rgba(0, 0, 0, 0.7))',
+                  transform: isCrossfading ? 'scale(0.96)' : 'scale(1)',
+                  transition: 'transform 0.3s ease',
+                }}
+              />
+            )}
+          </div>
+        </div>
+
+        {/* 2. THREE.JS 3D CANVAS (Continuous WebGL Canvas, zIndex 3) */}
         <canvas
           ref={canvasRef}
           style={{
@@ -957,14 +1043,14 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
             width: '100%',
             height: '100%',
             outline: 'none',
-            zIndex: 2,
-            opacity: revealPhase >= 2 ? 1 : 0,
-            transform: revealPhase >= 2
+            zIndex: 3,
+            opacity: (revealPhase >= 2 && isModelReady) ? 1 : 0,
+            transform: (revealPhase >= 2 && isModelReady)
               ? 'scale(1) translateY(0)'
               : 'scale(0.975) translateY(10px)',
             transition: reducedMotion
               ? 'opacity 0.3s ease'
-              : 'opacity 1.6s cubic-bezier(0.16, 1, 0.3, 1), transform 1.8s cubic-bezier(0.16, 1, 0.3, 1)',
+              : 'opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1), transform 1.2s cubic-bezier(0.16, 1, 0.3, 1)',
             willChange: 'opacity, transform',
             contain: 'strict',
           }}

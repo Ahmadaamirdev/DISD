@@ -15,6 +15,7 @@ export const heroProducts = {
     switcherLabel: 'Hydraulic Breaker',
     buttonPrompt: 'FORKLIFT',
     modelPath: getAssetUrl('/assets/tripo_pbr_model_4be6fa61-73bb-4da0-b263-fd93bf51e0cc_meshopt.glb'),
+    posterImage: getAssetUrl('/assets/01.png'),
     targetDim: 2.65,
     cameraLookAtYRatio: 0.92,
     product: {
@@ -112,6 +113,7 @@ export const heroProducts = {
     switcherLabel: 'Electric Forklift',
     buttonPrompt: 'BREAKER',
     modelPath: getAssetUrl('/assets/tripo_pbr_model_ee9cdc69-76a0-42b8-8eea-c47ed3342c9a_meshopt.glb'),
+    posterImage: getAssetUrl('/assets/02.png'),
     targetDim: 2.50,
     cameraLookAtYRatio: 0.88,
     product: {

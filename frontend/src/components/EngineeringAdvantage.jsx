@@ -57,6 +57,7 @@ export default function EngineeringAdvantage() {
         muted
         playsInline
         preload="metadata"
+        poster={getAssetUrl('quarry_hero_bg.jpg')}
       >
         <source src={getAssetUrl('chisel_explode_video.mp4')} type="video/mp4" />
         <source src={getAssetUrl('hero_video.mp4')} type="video/mp4" />

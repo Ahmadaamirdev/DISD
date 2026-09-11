@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ArrowRight } from 'lucide-react';
 import ScrollReveal from './ScrollReveal.jsx';
-import CategoryCard3DViewer, { preloadAllCategoryModels, preloadCategoryModel } from './CategoryCard3DViewer.jsx';
+import CategoryCard3DViewer, { preloadCategoryModel } from './CategoryCard3DViewer.jsx';
 import { getAssetUrl } from '../data/cloudinaryAssets';
 
 export default function StatsTicker({ onSelectCategory }) {
@@ -46,29 +46,8 @@ export default function StatsTicker({ onSelectCategory }) {
     }
   ];
 
-  // Automatic high-performance preloading when section approaches the viewport
-  useEffect(() => {
-    const modelUrls = categories.map((c) => c.model).filter(Boolean);
-
-    if (typeof window !== 'undefined' && 'IntersectionObserver' in window && sectionRef.current) {
-      const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              preloadAllCategoryModels(modelUrls);
-              observer.disconnect();
-            }
-          });
-        },
-        { rootMargin: '400px' }
-      );
-
-      observer.observe(sectionRef.current);
-      return () => observer.disconnect();
-    } else {
-      preloadAllCategoryModels(modelUrls);
-    }
-  }, []);
+  // On-demand loading: Category cards load lightweight high-res posters by default
+  // and only fetch 3D geometry on desktop hover, saving 40MB+ of eager network bandwidth.
 
   const handleCardClick = (category) => {
     if (onSelectCategory) {
