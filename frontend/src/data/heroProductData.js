@@ -20,7 +20,7 @@ export const heroProducts = {
       medium: getAssetUrl('/assets/tripo_pbr_model_4be6fa61-73bb-4da0-b263-fd93bf51e0cc_meshopt.glb'),
       low: getAssetUrl('/assets/tripo_pbr_model_4be6fa61-73bb-4da0-b263-fd93bf51e0cc_meshopt.glb'),
     },
-    posterImage: getAssetUrl('/assets/01.png'),
+    posterImage: getAssetUrl('/assets/hero_breaker_fallback.png'),
     targetDim: 2.65,
     cameraLookAtYRatio: 0.92,
     product: {
