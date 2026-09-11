@@ -150,3 +150,43 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--disd-amber-primary);
 }
+
+/* ==========================================================================
+   GLOBAL MOBILE IMPROVEMENTS
+   ========================================================================== */
+
+/* Remove tap highlight on mobile buttons/links */
+a, button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Momentum scrolling for scroll containers */
+.disd-chat-body,
+.overflow-y-auto {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Touch-optimized: no accidental text selection on buttons */
+button {
+  touch-action: manipulation;
+  user-select: none;
+}
+
+/* Thinner scrollbar on mobile screens */
+@media (max-width: 768px) {
+  ::-webkit-scrollbar { width: 4px; }
+
+  html {
+    /* Adjust scroll-padding-top for shorter mobile navbar */
+    scroll-padding-top: 68px;
+  }
+}
+
+@media (max-width: 480px) {
+  html { scroll-padding-top: 62px; }
+
+  /* Hide scrollbar entirely on touch — they swipe anyway */
+  ::-webkit-scrollbar { display: none; }
+  body { scrollbar-width: none; }
+}
+

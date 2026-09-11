@@ -441,13 +441,27 @@ export default function PillNav({
 
       {/* Mobile Menu Drawer */}
       {mobileMenuOpen && (
-        <div style={{ backgroundColor: '#003333', padding: '16px 24px', borderTop: '1px solid #005555' }}>
+        <div style={{
+          backgroundColor: '#002B2B',
+          borderTop: '1px solid rgba(255,153,0,0.25)',
+          padding: '8px 0 16px',
+          boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+        }}>
           {items.map((it, idx) => (
-            <div key={idx}>
+            <div key={idx} style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
               {it.submenu ? (
-                <div style={{ padding: '8px 0', color: '#fff', fontWeight: 600 }}>
-                  {it.label}
-                  <div style={{ paddingLeft: '16px', paddingTop: '8px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <div>
+                  <div style={{
+                    padding: '12px 24px',
+                    color: '#FF9900',
+                    fontWeight: 700,
+                    fontSize: '13px',
+                    letterSpacing: '0.5px',
+                    textTransform: 'uppercase',
+                  }}>
+                    {it.label}
+                  </div>
+                  <div style={{ paddingLeft: '24px', paddingBottom: '8px', display: 'flex', flexDirection: 'column' }}>
                     {it.submenu.map((sub, sIdx) => (
                       <button
                         key={sIdx}
@@ -456,7 +470,20 @@ export default function PillNav({
                           if (sub.onClick) sub.onClick();
                           else if (onSelectCategory && sub.category) onSelectCategory(sub.category);
                         }}
-                        style={{ textAlign: 'left', background: 'none', border: 'none', color: '#CBD5E1', fontSize: '13px', padding: '4px 0', cursor: 'pointer' }}
+                        style={{
+                          textAlign: 'left',
+                          background: 'none',
+                          border: 'none',
+                          borderBottom: sIdx < it.submenu.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
+                          color: '#CBD5E1',
+                          fontSize: '14px',
+                          padding: '11px 0',
+                          cursor: 'pointer',
+                          fontFamily: 'inherit',
+                          transition: 'color 0.15s ease',
+                        }}
+                        onTouchStart={(e) => { e.currentTarget.style.color = '#FF9900'; }}
+                        onTouchEnd={(e) => { e.currentTarget.style.color = '#CBD5E1'; }}
                       >
                         {sub.label}
                       </button>
@@ -484,7 +511,14 @@ export default function PillNav({
                       }
                     }
                   }}
-                  style={{ display: 'block', color: '#fff', padding: '8px 0', fontWeight: 600, textDecoration: 'none' }}
+                  style={{
+                    display: 'block',
+                    color: '#FFFFFF',
+                    padding: '14px 24px',
+                    fontWeight: 600,
+                    fontSize: '15px',
+                    textDecoration: 'none',
+                  }}
                 >
                   {it.label}
                 </a>
@@ -492,7 +526,7 @@ export default function PillNav({
             </div>
           ))}
           {ctaText && (
-            <div style={{ marginTop: 12 }}>
+            <div style={{ padding: '16px 24px 4px' }}>
               <button
                 type="button"
                 onClick={() => {
@@ -500,7 +534,7 @@ export default function PillNav({
                   if (onCtaClick) onCtaClick();
                 }}
                 className="disd-nav-cta"
-                style={{ width: '100%', textAlign: 'center' }}
+                style={{ width: '100%', textAlign: 'center', display: 'block' }}
               >
                 {ctaText}
               </button>
