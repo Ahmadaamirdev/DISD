@@ -68,6 +68,7 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
   const triggerIntroRef = useRef(null);
   const isSiteReadyRef = useRef(isSiteReady);
   const hasIntroTriggeredRef = useRef(false);
+  const isModelReadyRef = useRef(false);
 
   // Dynamic Product Switcher State (Hydraulic Breaker <-> Electric Forklift)
   const [selectedProductId, setSelectedProductId] = useState('breaker');
@@ -99,13 +100,13 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
   useEffect(() => {
     isSiteReadyRef.current = isSiteReady;
     if (isSiteReady) {
-      if (isModelReady && triggerIntroRef.current) {
+      if (isModelReadyRef.current && triggerIntroRef.current) {
         triggerIntroRef.current();
       } else {
         setRevealPhase(8);
       }
     }
-  }, [isSiteReady, isModelReady]);
+  }, [isSiteReady]);
 
   useEffect(() => {
     const handleWinResize = () => {
@@ -246,7 +247,7 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.14;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
-    
+
     // Adaptive Dynamic Shadows: Enabled only on high-tier hardware.
     // Medium/Low tiers use the soft contact shadow plane below the machine at 0 GPU cost!
     renderer.shadowMap.enabled = deviceTier.enableShadows;
@@ -451,38 +452,20 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
         const targetCamY = finalCenter.y * (isMobileScreen ? 1.08 : 1.05);
 
         if (isInitial) {
-          if (isSiteReadyRef.current) {
-            // Model finished loading after circular loading while site is already active:
-            // Appear directly in final resting state as requested!
-            camEndPos.set(0, targetCamY, targetCamZ);
-            camera.position.copy(camEndPos);
-            camera.lookAt(targetLookAt);
+          camStartPos.set(0.1, finalCenter.y * (isMobileScreen ? 3.6 : 3.5), isMobileScreen ? 6.0 : 4.2);
+          camEndPos.set(0, targetCamY, targetCamZ);
+          camera.position.copy(camStartPos);
+          camera.lookAt(targetLookAt);
 
-            model.rotation.y = baseRotationY;
-            model.position.y = baseModelY;
-            modelBaseScale = model.userData.initialScale || 1;
-            model.scale.setScalar(modelBaseScale);
+          modelStartRotY = baseRotationY - Math.PI / 4.0;
+          modelStartPosY = baseModelY - 0.22;
+          modelBaseScale = model.userData.initialScale || 1;
+          model.rotation.y = modelStartRotY;
+          model.position.y = modelStartPosY;
+          model.scale.setScalar(modelBaseScale);
 
-            isIntroActive = false;
-            modelTransitionStartTime = null;
-            hasIntroTriggeredRef.current = true;
-            controls.enabled = true;
-          } else {
-            camStartPos.set(0.1, finalCenter.y * (isMobileScreen ? 3.6 : 3.5), isMobileScreen ? 6.0 : 4.2);
-            camEndPos.set(0, targetCamY, targetCamZ);
-            camera.position.copy(camStartPos);
-            camera.lookAt(targetLookAt);
-
-            modelStartRotY = baseRotationY - Math.PI / 4.0;
-            modelStartPosY = baseModelY - 0.22;
-            modelBaseScale = model.userData.initialScale || 1;
-            model.rotation.y = modelStartRotY;
-            model.position.y = modelStartPosY;
-            model.scale.setScalar(modelBaseScale);
-
-            isIntroActive = false;
-            controls.enabled = false;
-          }
+          isIntroActive = false;
+          controls.enabled = false;
 
           // Warm up GPU shaders, compile shadow maps and upload textures while under preloader to eliminate any first-frame jank
           try {
@@ -508,6 +491,7 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
 
         setIsLoading(false);
         setIsModelReady(true);
+        isModelReadyRef.current = true;
 
         // Staggered reveal sequence synchronized with model presentation
         if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -519,34 +503,16 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
           isIntroActive = false;
         } else {
           if (isInitial) {
-            if (isSiteReadyRef.current) {
-              // Site is already open and ready (model loaded after circular loading)
-              // Keep all text cards, specs, markers, and title fully visible!
-              revealTimers.forEach(clearTimeout);
-              revealTimers.length = 0;
-              setRevealPhase(8);
-              controls.enabled = true;
-              isIntroActive = false;
-              modelTransitionStartTime = null;
-              hasIntroTriggeredRef.current = true;
-              camera.position.copy(camEndPos);
-              camera.lookAt(targetLookAt);
-              controls.target.copy(targetLookAt);
-              updateCardPositions();
-              setTimeout(() => { updateCardPositions(); }, 60);
-              setTimeout(() => { updateCardPositions(); }, 180);
-            } else {
-              revealTimers.forEach(clearTimeout);
-              revealTimers.length = 0;
-              setRevealPhase(2);
-              setTimeout(() => { updateCardPositions(); }, 50);
-            }
+            revealTimers.forEach(clearTimeout);
+            revealTimers.length = 0;
+            setRevealPhase(8);
+            setTimeout(() => { updateCardPositions(); }, 50);
 
             if (onModelLoaded) {
               onModelLoaded();
             }
 
-            if (!isSiteReadyRef.current && !hasIntroTriggeredRef.current && triggerIntroRef.current) {
+            if (isSiteReadyRef.current && !hasIntroTriggeredRef.current && triggerIntroRef.current) {
               triggerIntroRef.current();
             }
 
@@ -665,6 +631,9 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
     };
 
     triggerIntroRef.current = () => {
+      if (!isModelReadyRef.current) {
+        return;
+      }
       if (hasIntroTriggeredRef.current) {
         setRevealPhase(8);
         updateCardPositions();
@@ -680,11 +649,10 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
       revealTimers.forEach(clearTimeout);
       revealTimers.length = 0;
 
-      // Silky, lightweight staggered UI emergence synchronized with preloader dissolve
-      setRevealPhase(2);
-      revealTimers.push(setTimeout(() => setRevealPhase(4), 180));
-      revealTimers.push(setTimeout(() => setRevealPhase(8), 460));
-      revealTimers.push(setTimeout(() => updateCardPositions(), 520));
+      setRevealPhase(8);
+      updateCardPositions();
+      revealTimers.push(setTimeout(() => updateCardPositions(), 80));
+      revealTimers.push(setTimeout(() => updateCardPositions(), 240));
     };
 
     loadProductModel(selectedProductId, true);
