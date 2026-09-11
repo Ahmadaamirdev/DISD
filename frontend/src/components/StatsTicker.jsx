@@ -49,7 +49,17 @@ export default function StatsTicker({ onSelectCategory }) {
   // On-demand loading: Category cards load lightweight high-res posters by default
   // and only fetch 3D geometry on desktop hover, saving 40MB+ of eager network bandwidth.
 
-  const handleCardClick = (category) => {
+  const handleCardClick = (e, category, idx) => {
+    const isTouch = typeof window !== 'undefined' && (window.innerWidth < 1024 || window.matchMedia('(pointer: coarse)').matches);
+    if (isTouch) {
+      // If user taps specifically on the action button or arrow, proceed to category
+      const isAction = e.target.closest('.disd-cat-five-action') || e.target.closest('.disd-cat-five-back-action');
+      if (!isAction && hoveredIdx !== idx) {
+        e.preventDefault();
+        setHoveredIdx(idx);
+        return;
+      }
+    }
     if (onSelectCategory) {
       onSelectCategory(category);
     }
@@ -63,7 +73,6 @@ export default function StatsTicker({ onSelectCategory }) {
   };
 
   const handleTouchCard = (idx, model) => {
-    setHoveredIdx((prev) => (prev === idx ? null : idx));
     if (model) {
       preloadCategoryModel(model);
     }
@@ -97,7 +106,7 @@ export default function StatsTicker({ onSelectCategory }) {
                 <div
                   key={idx}
                   className={`disd-cat-five-card ${isHovered ? 'is-flipped' : ''}`}
-                  onClick={() => handleCardClick(item.category)}
+                  onClick={(e) => handleCardClick(e, item.category, idx)}
                   onMouseEnter={() => handleMouseEnterCard(idx, item.model)}
                   onMouseLeave={() => setHoveredIdx(null)}
                   onTouchStart={() => handleTouchCard(idx, item.model)}

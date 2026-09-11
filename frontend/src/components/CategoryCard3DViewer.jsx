@@ -195,21 +195,20 @@ export default function CategoryCard3DViewer({ modelPath, isHovered, title = 'Eq
   const isHoveredRef = useRef(isHovered);
   isHoveredRef.current = isHovered;
 
-  // Initialize WebGL context strictly on desktop user hover with 180ms hover-intent delay
-  // Prevents sweeping mouse across 5 cards from triggering 5 simultaneous WebGL context creations
+  // Initialize WebGL context on desktop user hover or mobile card flip
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const isTouchOrMobile = window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 1024;
-    if (isTouchOrMobile) return; // Touch & mobile devices use the optimized poster image with zero WebGL overhead
 
     const deviceTier = getDeviceTier();
     if (deviceTier.isFallback) return;
 
     let timer;
     if (isHovered && !hasStartedInit) {
+      const isTouchOrMobile = window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 1024;
+      const delay = isTouchOrMobile ? 40 : 180;
       timer = setTimeout(() => {
         setHasStartedInit(true);
-      }, 180);
+      }, delay);
     }
 
     return () => {
@@ -358,6 +357,11 @@ export default function CategoryCard3DViewer({ modelPath, isHovered, title = 'Eq
     };
 
     window.addEventListener('resize', handleResize, { passive: true });
+    let resizeObserver = null;
+    if (typeof ResizeObserver !== 'undefined') {
+      resizeObserver = new ResizeObserver(handleResize);
+      resizeObserver.observe(container);
+    }
 
     // Initial render
     renderer.render(scene, camera);
@@ -366,6 +370,7 @@ export default function CategoryCard3DViewer({ modelPath, isHovered, title = 'Eq
     return () => {
       isDisposed = true;
       window.removeEventListener('resize', handleResize);
+      if (resizeObserver) resizeObserver.disconnect();
       if (cardEl) {
         cardEl.removeEventListener('pointerenter', handlePointerEnter);
         cardEl.removeEventListener('pointermove', handlePointerMove);
