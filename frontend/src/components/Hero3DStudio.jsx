@@ -65,10 +65,17 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
   const headerRef = useRef(null);
   const cardPositionsRef = useRef({});
   const triggerIntroRef = useRef(null);
+  const isSiteReadyRef = useRef(isSiteReady);
+  const hasIntroTriggeredRef = useRef(false);
 
   useEffect(() => {
-    if (isSiteReady && triggerIntroRef.current) {
-      triggerIntroRef.current();
+    isSiteReadyRef.current = isSiteReady;
+    if (isSiteReady) {
+      if (triggerIntroRef.current) {
+        triggerIntroRef.current();
+      } else {
+        setRevealPhase(8);
+      }
     }
   }, [isSiteReady]);
 
@@ -467,23 +474,35 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
         setIsModelReady(true);
 
         // Staggered reveal sequence synchronized with model presentation
-        revealTimers.forEach(clearTimeout);
-        revealTimers.length = 0;
         if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          revealTimers.forEach(clearTimeout);
+          revealTimers.length = 0;
           setRevealPhase(8);
           camera.position.copy(camEndPos);
           controls.enabled = true;
           isIntroActive = false;
         } else {
           if (isInitial) {
-            setRevealPhase(2);
-            setTimeout(() => { updateCardPositions(); }, 50);
+            if (isSiteReadyRef.current) {
+              // Site is already open and ready (e.g. low-end PC where model loaded after preloader)
+              // Keep all text cards, specs, and title fully visible!
+              setRevealPhase(8);
+              controls.enabled = true;
+              isIntroActive = false;
+              camera.position.copy(camEndPos);
+              setTimeout(() => { updateCardPositions(); }, 60);
+            } else {
+              revealTimers.forEach(clearTimeout);
+              revealTimers.length = 0;
+              setRevealPhase(2);
+              setTimeout(() => { updateCardPositions(); }, 50);
+            }
 
             if (onModelLoaded) {
               onModelLoaded();
             }
 
-            if (isSiteReady && triggerIntroRef.current) {
+            if (isSiteReadyRef.current && !hasIntroTriggeredRef.current && triggerIntroRef.current) {
               triggerIntroRef.current();
             }
 
@@ -602,6 +621,13 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
     };
 
     triggerIntroRef.current = () => {
+      if (hasIntroTriggeredRef.current) {
+        setRevealPhase(8);
+        updateCardPositions();
+        return;
+      }
+      hasIntroTriggeredRef.current = true;
+
       const now = getElapsedTime();
       introStartTime = now;
       isIntroActive = true;
@@ -1023,6 +1049,49 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
           reducedMotion={reducedMotion}
           innerRef={bgTextRef}
         />
+
+        {/* Decent & Simple Circular 3D Loading Spinner (Active while model loads on slower/low-end hardware) */}
+        {!isModelReady && !webglUnavailable && isSiteReady && (
+          <div
+            className="disd-hero-model-loader"
+            style={{
+              position: 'absolute',
+              inset: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              pointerEvents: 'none',
+              zIndex: 2,
+            }}
+          >
+            <div
+              style={{
+                width: 46,
+                height: 46,
+                borderRadius: '50%',
+                border: '3px solid rgba(255, 153, 0, 0.15)',
+                borderTopColor: '#FF9900',
+                animation: 'disdCard3dSpin 0.85s linear infinite',
+                boxShadow: '0 0 24px rgba(255, 153, 0, 0.18)',
+              }}
+            />
+            <span
+              style={{
+                marginTop: 14,
+                fontSize: 11,
+                fontWeight: 700,
+                letterSpacing: '1.8px',
+                textTransform: 'uppercase',
+                color: 'rgba(255, 255, 255, 0.55)',
+                fontFamily: "'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif",
+                textShadow: '0 2px 8px rgba(0, 0, 0, 0.8)',
+              }}
+            >
+              Loading 3D Model{loadingProgress > 0 && loadingProgress < 100 ? ` (${loadingProgress}%)` : '...'}
+            </span>
+          </div>
+        )}
 
         {/* 2. THREE.JS 3D CANVAS (Continuous WebGL Canvas, zIndex 3) */}
         {!webglUnavailable && (
