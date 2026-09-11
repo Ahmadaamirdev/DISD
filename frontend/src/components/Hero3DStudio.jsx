@@ -1024,49 +1024,6 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
           innerRef={bgTextRef}
         />
 
-        {/* 1.5 POSTER-FIRST VISUAL & FALLBACK (zIndex 2) */}
-        {activeProduct.posterImage && (
-          <div
-            className="disd-hero-poster-wrapper"
-            style={{
-              position: 'absolute',
-              inset: 0,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              pointerEvents: 'none',
-              zIndex: 2,
-              opacity: (isModelReady && !webglUnavailable) ? 0 : 1,
-              transition: 'opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1)',
-            }}
-          >
-            <div
-              style={{
-                position: 'relative',
-                width: 'min(90vw, 560px)',
-                height: 'min(50vh, 440px)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginTop: '-2vh',
-              }}
-            >
-              <img
-                src={activeProduct.posterImage}
-                alt={product.name}
-                style={{
-                  maxHeight: '100%',
-                  maxWidth: '100%',
-                  objectFit: 'contain',
-                  filter: 'drop-shadow(0 20px 30px rgba(0, 0, 0, 0.7))',
-                  transform: isCrossfading ? 'scale(0.96)' : 'scale(1)',
-                  transition: 'transform 0.3s ease',
-                }}
-              />
-            </div>
-          </div>
-        )}
-
         {/* 2. THREE.JS 3D CANVAS (Continuous WebGL Canvas, zIndex 3) */}
         {!webglUnavailable && (
           <canvas

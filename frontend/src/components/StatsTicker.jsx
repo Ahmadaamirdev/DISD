@@ -143,7 +143,6 @@ export default function StatsTicker({ onSelectCategory }) {
                             modelPath={item.model}
                             isHovered={isHovered}
                             title={item.title}
-                            posterImage={item.image}
                           />
                         )}
                       </div>

@@ -177,7 +177,7 @@ function getSharedContactShadowMesh() {
   return shadowPlane;
 }
 
-export default function CategoryCard3DViewer({ modelPath, isHovered, title = 'Equipment', posterImage }) {
+export default function CategoryCard3DViewer({ modelPath, isHovered, title = 'Equipment' }) {
   const mountRef = useRef(null);
   const [hasStartedInit, setHasStartedInit] = useState(false);
   const [isModelReady, setIsModelReady] = useState(false);
