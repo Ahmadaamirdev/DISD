@@ -14,7 +14,6 @@ import HeroTypography from './hero/HeroTypography.jsx';
 import HeroSpecification from './hero/HeroSpecification.jsx';
 import HeroSpecificationMarker from './hero/HeroSpecificationMarker.jsx';
 import HeroSpecificationConnector from './hero/HeroSpecificationConnector.jsx';
-import HeroMobileSpecifications from './hero/HeroMobileSpecifications.jsx';
 import { getAssetUrl } from '../data/cloudinaryAssets';
 
 const MODEL_PATH = getAssetUrl('/assets/tripo_pbr_model_4be6fa61-73bb-4da0-b263-fd93bf51e0cc_meshopt.glb');
@@ -577,7 +576,7 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
       renderer.setSize(width, height, false);
       try {
         renderer.render(scene, camera);
-      } catch (e) {}
+      } catch (e) { }
       if (resizeRafId) cancelAnimationFrame(resizeRafId);
       resizeRafId = requestAnimationFrame(() => {
         updateCardPositions();
@@ -847,9 +846,8 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
         transform: 'translateZ(0)',
       }}
     >
-      {/* 0. PRODUCT MODEL SWITCHER BUTTON (Top Right Corner - Desktop) */}
+      {/* 0. PRODUCT MODEL SWITCHER BUTTON (Top Right Corner) */}
       <div
-        className="disd-desktop-switcher-wrapper"
         style={{
           position: 'absolute',
           top: 'clamp(28px, 4.5vh, 44px)',
@@ -904,8 +902,8 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
           transition: reducedMotion
             ? 'none'
             : isCrossfading
-            ? 'opacity 0.24s cubic-bezier(0.4, 0, 1, 1), transform 0.24s cubic-bezier(0.4, 0, 1, 1)'
-            : 'opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1), transform 0.85s cubic-bezier(0.16, 1, 0.3, 1)',
+              ? 'opacity 0.24s cubic-bezier(0.4, 0, 1, 1), transform 0.24s cubic-bezier(0.4, 0, 1, 1)'
+              : 'opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1), transform 0.85s cubic-bezier(0.16, 1, 0.3, 1)',
           pointerEvents: isCrossfading ? 'none' : 'auto',
         }}
       >
@@ -943,7 +941,6 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
         {/* 3. DYNAMIC TECHNICAL CONNECTOR LINES (zIndex 3) */}
         <svg
           ref={svgRef}
-          className="disd-hero-connectors-svg"
           style={{
             position: 'absolute',
             inset: 0,
@@ -1001,14 +998,11 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
           revealPhase={revealPhase}
           reducedMotion={reducedMotion}
           innerRef={headerRef}
-          selectedProductId={selectedProductId}
-          onToggleProduct={handleToggleProduct}
         />
 
-        {/* 6. SPECIFICATION CALLOUTS: LEFT & RIGHT COLUMNS (Desktop Only, zIndex 5) */}
+        {/* 6. SPECIFICATION CALLOUTS: LEFT & RIGHT COLUMNS (zIndex 5) */}
         <div
           ref={specsContainerRef}
-          className="disd-desktop-specs-container"
           style={{
             position: 'absolute',
             inset: 0,
@@ -1024,7 +1018,7 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
           {/* LEFT COLUMN: 2 Specifications */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(60px, 12vh, 120px)' }}>
             {leftSpecs.map((spec) => (
-              <div key={spec.id}>
+              <div key={spec.id} className={spec.order > 2 ? 'hero-spec-secondary' : ''}>
                 <HeroSpecification
                   spec={spec}
                   isHovered={activeHoverId === spec.id}
@@ -1043,7 +1037,7 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
           {/* RIGHT COLUMN: 2 Specifications */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(60px, 12vh, 120px)' }}>
             {rightSpecs.map((spec) => (
-              <div key={spec.id}>
+              <div key={spec.id} className={spec.order > 2 ? 'hero-spec-secondary' : ''}>
                 <HeroSpecification
                   spec={spec}
                   isHovered={activeHoverId === spec.id}
@@ -1058,16 +1052,6 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
               </div>
             ))}
           </div>
-        </div>
-
-        {/* 6B. MOBILE SPECIFICATIONS DOCK (Mobile & Tablet <= 768px) */}
-        <div className="disd-mobile-specs-container">
-          <HeroMobileSpecifications
-            specifications={specifications}
-            activeHoverId={activeHoverId}
-            onSelectSpec={handleSpecSelect}
-            revealPhase={revealPhase}
-          />
         </div>
       </div>
       {/* 7. SCROLL TO EXPLORE TRIGGER */}
@@ -1274,39 +1258,8 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
         .disd-model-switcher-btn:hover .switcher-btn-arrow {
           transform: translateX(3px);
         }
-        .disd-desktop-switcher-wrapper {
-          display: block;
-        }
-        .disd-mobile-switcher-wrapper {
-          display: none;
-        }
-        .disd-desktop-specs-container {
-          display: flex;
-        }
-        .disd-mobile-specs-container {
-          display: none;
-        }
-        .disd-hero-connectors-svg {
-          display: block;
-        }
-
-        @media (max-width: 768px) {
-          .disd-desktop-switcher-wrapper {
-            display: none !important;
-          }
-          .disd-mobile-switcher-wrapper {
-            display: flex !important;
-            justify-content: center;
-            align-items: center;
-          }
-          .disd-desktop-specs-container {
-            display: none !important;
-          }
-          .disd-mobile-specs-container {
-            display: flex !important;
-            width: 100%;
-          }
-          .disd-hero-connectors-svg {
+        @media (max-width: 640px) {
+          .hero-spec-secondary {
             display: none !important;
           }
           .disd-model-switcher-btn {
