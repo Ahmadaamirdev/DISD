@@ -52,7 +52,16 @@ export default function PillNav({
 
   const menuContainerRef = useRef(null);
   const itemRefs = useRef([]);
+  const dropdownTimeoutRef = useRef(null);
   const cssEase = resolveEase(ease);
+
+  useEffect(() => {
+    return () => {
+      if (dropdownTimeoutRef.current) {
+        clearTimeout(dropdownTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Detect scroll to transition from transparent on hero to colored on scroll (RAF throttled)
   useEffect(() => {
@@ -115,10 +124,31 @@ export default function PillNav({
     updatePillPosition(index);
   };
 
+  const handleDropdownEnter = (index) => {
+    if (dropdownTimeoutRef.current) {
+      clearTimeout(dropdownTimeoutRef.current);
+      dropdownTimeoutRef.current = null;
+    }
+    handleMouseEnterItem(index);
+    setDropdownOpen(true);
+  };
+
+  const handleDropdownLeave = () => {
+    if (dropdownTimeoutRef.current) {
+      clearTimeout(dropdownTimeoutRef.current);
+    }
+    dropdownTimeoutRef.current = setTimeout(() => {
+      setDropdownOpen(false);
+      setHoveredIndex(null);
+      setPillStyle((prev) => ({ ...prev, opacity: 0 }));
+    }, 280);
+  };
+
   const handleMouseLeaveMenu = () => {
-    setHoveredIndex(null);
-    setDropdownOpen(false);
-    setPillStyle((prev) => ({ ...prev, opacity: 0 }));
+    if (!dropdownOpen) {
+      setHoveredIndex(null);
+      setPillStyle((prev) => ({ ...prev, opacity: 0 }));
+    }
   };
 
   const handleItemClick = (item, index) => {
@@ -203,13 +233,8 @@ export default function PillNav({
                   key={item.label || index}
                   ref={(el) => (itemRefs.current[index] = el)}
                   className="disd-dropdown-wrapper"
-                  onMouseEnter={() => {
-                    handleMouseEnterItem(index);
-                    setDropdownOpen(true);
-                  }}
-                  onMouseLeave={() => {
-                    setDropdownOpen(false);
-                  }}
+                  onMouseEnter={() => handleDropdownEnter(index)}
+                  onMouseLeave={handleDropdownLeave}
                   style={{ position: 'relative', zIndex: 1 }}
                 >
                   <button
@@ -247,58 +272,83 @@ export default function PillNav({
                     />
                   </button>
 
-                  {/* Dropdown Menu */}
+                  {/* Dropdown Menu with Continuous Hover Bridge */}
                   {dropdownOpen && (
                     <div
-                      className="disd-dropdown-menu"
                       style={{
                         position: 'absolute',
-                        top: 'calc(100% + 8px)',
+                        top: '100%',
                         left: 0,
-                        width: 260,
-                        backgroundColor: '#FFFFFF',
-                        border: '1px solid #E2E8F0',
-                        borderRadius: 8,
-                        boxShadow: '0 16px 32px rgba(0, 0, 0, 0.15)',
-                        padding: '10px 0',
+                        paddingTop: 6, // Zero-gap hover bridge
                         zIndex: 200,
-                        animation: 'dropdownFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
                       }}
+                      onMouseEnter={() => handleDropdownEnter(index)}
+                      onMouseLeave={handleDropdownLeave}
                     >
-                      {item.submenu.map((sub, sIdx) => (
-                        <button
-                          key={sIdx}
-                          type="button"
-                          onClick={() => {
-                            setDropdownOpen(false);
-                            if (sub.onClick) {
-                              sub.onClick();
-                            } else if (onSelectCategory && sub.category) {
-                              onSelectCategory(sub.category);
-                              const element = document.getElementById('products');
-                              if (element) {
-                                element.scrollIntoView({ behavior: 'smooth' });
+                      <div
+                        className="disd-dropdown-menu"
+                        style={{
+                          position: 'relative',
+                          top: 0,
+                          left: 0,
+                          width: 270,
+                          backgroundColor: isScrolled
+                            ? 'rgba(0, 45, 45, 0.98)'
+                            : 'rgba(0, 30, 30, 0.45)',
+                          backdropFilter: 'blur(20px)',
+                          WebkitBackdropFilter: 'blur(20px)',
+                          border: isScrolled
+                            ? '1px solid rgba(0, 85, 85, 0.65)'
+                            : '1px solid rgba(255, 255, 255, 0.15)',
+                          borderTop: '2px solid #FF9900',
+                          borderRadius: 12,
+                          boxShadow: isScrolled
+                            ? '0 20px 40px -8px rgba(0, 0, 0, 0.55), 0 0 25px rgba(0, 68, 68, 0.35)'
+                            : '0 16px 36px rgba(0, 0, 0, 0.35)',
+                          padding: '6px 0',
+                          zIndex: 200,
+                          animation: 'dropdownFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+                          overflow: 'hidden',
+                          transition: 'background-color 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease',
+                        }}
+                      >
+                        {item.submenu.map((sub, sIdx) => (
+                          <button
+                            key={sIdx}
+                            type="button"
+                            onClick={() => {
+                              setDropdownOpen(false);
+                              if (sub.onClick) {
+                                sub.onClick();
+                              } else if (onSelectCategory && sub.category) {
+                                onSelectCategory(sub.category);
+                                const element = document.getElementById('products');
+                                if (element) {
+                                  element.scrollIntoView({ behavior: 'smooth' });
+                                }
                               }
-                            }
-                          }}
-                          className="disd-dropdown-item"
-                          style={{
-                            display: 'block',
-                            width: '100%',
-                            textAlign: 'left',
-                            padding: '10px 20px',
-                            fontSize: 13,
-                            fontWeight: 500,
-                            color: '#1E293B',
-                            background: 'transparent',
-                            border: 'none',
-                            cursor: 'pointer',
-                            transition: 'all 0.18s ease',
-                          }}
-                        >
-                          {sub.label}
-                        </button>
-                      ))}
+                            }}
+                            className="disd-dropdown-item"
+                            style={{
+                              display: 'block',
+                              width: '100%',
+                              textAlign: 'left',
+                              padding: '10px 18px',
+                              fontSize: 13,
+                              fontWeight: 500,
+                              color: '#F1F5F9',
+                              background: 'transparent',
+                              border: 'none',
+                              borderBottom: sIdx === item.submenu.length - 1 ? 'none' : '1px solid rgba(255, 255, 255, 0.05)',
+                              cursor: 'pointer',
+                              transition: 'all 0.18s ease',
+                              fontFamily: 'inherit',
+                            }}
+                          >
+                            {sub.label}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -470,10 +520,14 @@ export default function PillNav({
             transform: translateY(0);
           }
         }
+        .disd-dropdown-item {
+          color: #F1F5F9 !important;
+          transition: all 0.18s ease !important;
+        }
         .disd-dropdown-item:hover {
-          background-color: #F1F5F9 !important;
-          color: #FF8A1A !important;
-          padding-left: 24px !important;
+          background-color: rgba(255, 153, 0, 0.14) !important;
+          color: #FF9900 !important;
+          padding-left: 22px !important;
         }
         @media (max-width: 992px) {
           .disd-pillnav-menu {

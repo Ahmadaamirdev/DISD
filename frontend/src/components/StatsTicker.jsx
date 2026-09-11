@@ -133,7 +133,7 @@ export default function StatsTicker({ onSelectCategory }) {
                           className="disd-cat-five-img"
                           loading="eager"
                           decoding="async"
-                          fetchPriority={idx < 2 ? 'high' : 'auto'}
+                          fetchpriority={idx < 2 ? 'high' : 'auto'}
                           width="260"
                           height="195"
                         />

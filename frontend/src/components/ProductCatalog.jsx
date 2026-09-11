@@ -111,7 +111,7 @@ export default function ProductCatalog({ selectedCategory: propCategory, onSelec
                       className="disd-prod-img"
                       loading={isHighPriority ? 'eager' : 'lazy'}
                       decoding="async"
-                      fetchPriority={isHighPriority ? 'high' : 'auto'}
+                      fetchpriority={isHighPriority ? 'high' : 'auto'}
                       width="320"
                       height="240"
                     />

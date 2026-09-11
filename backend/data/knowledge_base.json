@@ -1,0 +1,101 @@
+{
+  "company_metadata": {
+    "name": "Dragon International Services & Development LLC (DISD)",
+    "email": "shoaib@deepaxis.cn",
+    "phone": "+966-543732208",
+    "website": "https://disdmachinery.com"
+  },
+  "chunks": [
+    {
+      "id": "about-us",
+      "category": "About",
+      "title": "About Dragon International Services & Development LLC (DISD)",
+      "content": "Dragon International Services & Development LLC (DISD) is an international heavy machinery and demolition equipment manufacturer with a regional sales, parts, and engineering depot in Jeddah, Saudi Arabia. DISD engineers high-performance attachments following Japanese Komatsu KES standards, ISO 9001:2015 quality management, and CE European Machinery directives. Our mission is delivering maximum impact with minimum downtime across Saudi Arabia, GCC, and global markets. Explore our [Company Profile](#company-profile).",
+      "keywords": ["about", "who we are", "company", "mission", "values", "history", "disd", "dragon international", "headquarters", "standards", "komatsu kes", "iso"]
+    },
+    {
+      "id": "services-overview",
+      "category": "Services",
+      "title": "Core Services & Engineering Capabilities",
+      "content": "DISD delivers end-to-end heavy equipment solutions including: 1) Hydraulic breaker engineering and precision CNC manufacturing; 2) Custom excavator quick-coupler adapter bracket engineering; 3) On-site hydraulic flow and pressure calibration; 4) Material handling forklifts and earthmoving equipment; 5) Immediate spare parts logistics and 24-hour technical response across Saudi Arabia. Check our full [Machinery Products](#products) or request a quote at [Quote Estimator](#quote-estimator).",
+      "keywords": ["services", "capabilities", "what you do", "solutions", "offerings", "engineering", "calibration", "adapters", "customization", "brackets"]
+    },
+    {
+      "id": "contact-info",
+      "category": "Contact",
+      "title": "Contact & Regional Depot Support",
+      "content": "Reach our engineering and sales specialists directly via email at [shoaib@deepaxis.cn](mailto:shoaib@deepaxis.cn) or phone/WhatsApp at [+966-543732208](tel:+966543732208). Our Western Province depot is located at: حي، طريق جازان العام, Al Jawharah, Jeddah, Kingdom of Saudi Arabia. Operating hours are Sunday – Thursday: 08:00 – 18:00 (GMT+3). Visit our [Where to Buy & Depot](#where-to-buy) section.",
+      "keywords": ["contact", "email", "phone", "support", "location", "address", "reach", "jeddah", "depot", "saudi arabia", "office", "whatsapp"]
+    },
+    {
+      "id": "hydraulic-breakers",
+      "category": "Products",
+      "title": "DISD Hydraulic Breakers (Triangular & Heavy Series)",
+      "content": "DISD manufactures heavy-duty hydraulic breakers including the DISD-TB210 (Heavy Triangular Series 4BE). Engineered for 20-32 ton excavators (e.g., CAT 320/330, Komatsu PC200/PC300, Volvo EC210), it delivers 5,500 - 8,200 Joules of impact energy at 350 - 650 bpm. Specifications: 140 mm high-alloy forged chisel, operating pressure 160 - 180 bar (2,320 - 2,610 psi), and 150 - 190 L/min oil flow. Features Hardox 500 exterior wear plates, anti-blank firing auto-cushion system, and nitrogen gas accumulator boost. See [Products Catalog](#products).",
+      "keywords": ["breaker", "hydraulic breaker", "hammer", "rock breaker", "tb210", "series 4be", "chisel", "joules", "impact energy", "quarry", "demolition"]
+    },
+    {
+      "id": "carrier-compatibility",
+      "category": "Compatibility",
+      "title": "Excavator & Carrier Compatibility Guide",
+      "content": "DISD attachments are 100% compatible with major excavator brands including Caterpillar (CAT), Komatsu, Volvo, Hyundai, Doosan/Develon, Sany, Hitachi, Kobelco, and JCB. Carrier tonnage matching: 0.8-2.5 Ton (Micro Series), 3-7 Ton (Light Compact), 12-18 Ton (Medium Utility), 20-26 Ton (Heavy Commercial DISD-TB210), 28-36 Ton (Heavy Quarry 4BE), and 40-70 Ton (Super Heavy Mining). We supply custom CNC-machined adapter brackets tailored to your carrier's pin diameter, stick ear width, and center spacing.",
+      "keywords": ["compatibility", "carrier", "excavator", "tonnage", "cat", "caterpillar", "komatsu", "volvo", "hyundai", "doosan", "sany", "hitachi", "fit", "adapter", "pin size"]
+    },
+    {
+      "id": "forklift-4wd",
+      "category": "Products",
+      "title": "DISD-FL500-4WD All-Terrain Rough-Terrain Forklift",
+      "content": "The DISD-FL500-4WD is a rough-terrain 4-wheel drive forklift with a 5,000 kg (5.0 metric ton) rated capacity. Equipped with a 74 kW turbocharged diesel engine, 320 mm ground clearance, electronic differential lock, and 4,500 mm triplex full-free mast. Includes a ROPS/FOPS Level II air-conditioned safety cabin and deep-tread off-road tires, engineered for desert sand, quarries, and remote logistics yards. View in [Products](#products).",
+      "keywords": ["forklift", "4wd", "fl500", "rough terrain", "all-terrain", "material handling", "5 ton", "diesel", "off-road"]
+    },
+    {
+      "id": "vibrating-compactor",
+      "category": "Products",
+      "title": "DISD-VC80 High-Frequency Vibrating Compactor",
+      "content": "The DISD-VC80 high-frequency vibrating compactor attachment is designed for 12-20 ton excavators. Features 82 kN impulse force, 2,000 - 2,400 vpm vibration frequency, 1,100 x 800 mm base plate, and operating pressure of 140 - 160 bar (80 - 110 L/min). Swedish rubber dampeners isolate 95% of recoil from the excavator boom, making it ideal for utility trench backfill and road embankments. View in [Products](#products).",
+      "keywords": ["compactor", "vibrating compactor", "vc80", "compaction", "trench", "embankment", "impulse force", "frequency"]
+    },
+    {
+      "id": "excavator-ex360",
+      "category": "Products",
+      "title": "DISD-EX360HD Heavy Crawler Hydraulic Excavator",
+      "content": "The DISD-EX360HD is a 36-ton heavy mining crawler excavator powered by a 212 kW engine with positive flow hydraulic control (2 x 290 L/min, 343/373 bar). Includes a tropicalized cooling radiator engineered for 55°C ambient desert heat, 1.8 - 2.2 m³ heavy rock bucket, 10.87 m reach, 7.38 m depth, and reinforced X-frame undercarriage with factory dual auxiliary piping. View in [Products](#products).",
+      "keywords": ["excavator", "ex360hd", "crawler", "36 ton", "earthmover", "mining", "bucket", "digging"]
+    },
+    {
+      "id": "wood-stone-grapple",
+      "category": "Products",
+      "title": "DISD-WG360 Industrial Hydraulic Wood & Stone Grapple",
+      "content": "The DISD-WG360 hydraulic grapple fits 18-26 ton excavators, featuring 360° continuous hydraulic rotation, 115 kN clamping force, and 1,950 mm jaw opening. Tine tips are forged from Hardox 500 steel for rock sorting, seawall construction, demolition debris segregation, and log handling. Protected enclosed dual hydraulic cylinders prevent stone impact damage. View in [Products](#products).",
+      "keywords": ["grapple", "wg360", "stone grapple", "wood grapple", "360 rotation", "clamping force", "demolition"]
+    },
+    {
+      "id": "scissor-lift",
+      "category": "Products",
+      "title": "DISD-SL1400 Rough-Terrain Scissor Lift & Lifting Slings",
+      "content": "The DISD-SL1400 aerial access scissor lift provides 14.0 m - 16.0 m working height and 450 kg platform capacity (dual operator + tooling). Features 48V 320Ah power, 4 one-touch self-leveling hydraulic outriggers, dynamic tilt cutoff sensors, and certified forged crane rigging sling eyelets for industrial plant, refinery, and facade maintenance. View in [Products](#products).",
+      "keywords": ["scissor lift", "sl1400", "aerial work platform", "working height", "outriggers", "plant maintenance"]
+    },
+    {
+      "id": "quotation-rfq",
+      "category": "Commercial",
+      "title": "Quotation & Commercial RFQ Process",
+      "content": "Obtaining a DISD commercial quote is fast and straightforward: 1) Provide machinery type and excavator model/tonnage; 2) DISD verifies hydraulic pressure/flow specifications; 3) Adapter bracket pin dimensions are confirmed; 4) Formal proforma invoice is issued within 24 hours with transparent FOB, CIF Jeddah, or CIF Dammam pricing. Supported payment terms: L/C, T/T, and Bank Guarantees. Build your quotation directly on our [Quote Estimator](#quote-estimator).",
+      "keywords": ["quote", "quotation", "price", "pricing", "rfq", "cost", "proforma", "cif", "fob", "payment", "buy", "order"]
+    },
+    {
+      "id": "warranty-policy",
+      "category": "Warranty",
+      "title": "Warranty Policy & Spare Parts Support",
+      "content": "DISD machinery includes comprehensive warranty coverage: 24 Months Structural Warranty and 12 Months Core Hydraulic Powercell Warranty for breakers, and 24 months / 3,000 operating hours for excavators. Coverage protects cylinder, main body, front/back head, and accumulator against defects. Our Jeddah depot maintains full stocks of chisels (moil, wedge, blunt), Parker/NOK polyurethane seal kits, diaphragms, and wear plates with 24-hour dispatch. Submit inquiries at [Quote Estimator](#quote-estimator).",
+      "keywords": ["warranty", "guarantee", "parts", "spare parts", "seal kit", "chisel", "diaphragm", "repair", "service", "support"]
+    },
+    {
+      "id": "maintenance-guidelines",
+      "category": "Maintenance",
+      "title": "Maintenance, Greasing & Troubleshooting",
+      "content": "Ensure maximum breaker lifespan: 1) Greasing: Apply high-temperature lithium-molybdenum disulfide (MoS2) chisel paste every 2 to 3 operating hours with breaker vertical and tool pressed against hard rock; 2) Nitrogen Gas: Inspect accumulator pressure (55-60 bar) and back head (14-16 bar) every 100-150 hours; 3) Hydraulic Oil: Use ISO VG 46/68 with 10-micron filtration below 80°C; 4) Anti-Blank Firing: DISD auto-cushion prevents tie-rod and cylinder damage when chisel extends freely.",
+      "keywords": ["maintenance", "greasing", "lubrication", "nitrogen", "pressure", "blank firing", "troubleshooting", "oil", "filter", "chisel paste"]
+    }
+  ]
+}

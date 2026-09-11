@@ -10,6 +10,7 @@ import Footer from './components/Footer.jsx';
 import SectionDivider from './components/SectionDivider.jsx';
 import SitePreloader from './components/SitePreloader.jsx';
 import useSmoothScroll from './hooks/useSmoothScroll.js';
+import ChatWidget from './components/ChatWidget.jsx';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -155,6 +156,9 @@ export default function App() {
 
         {/* 8. Footer */}
         <Footer />
+
+        {/* 9. AI Assistant Chat Widget - hidden during loading animation */}
+        {!showPreloader && <ChatWidget />}
       </div>
     </ErrorBoundary>
   );
