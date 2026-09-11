@@ -161,6 +161,7 @@ function getSharedContactShadowMesh() {
     ctx.fill();
 
     cachedShadowTexture = new THREE.CanvasTexture(canvas);
+    cachedShadowTexture.premultiplyAlpha = false;
     cachedShadowTexture.needsUpdate = true;
     cachedShadowGeo = new THREE.PlaneGeometry(2.2, 1.2);
     cachedShadowMat = new THREE.MeshBasicMaterial({

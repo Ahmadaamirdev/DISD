@@ -56,6 +56,7 @@ export default function EngineeringAdvantage() {
         loop
         muted
         playsInline
+        crossOrigin="anonymous"
         preload="metadata"
         poster={getAssetUrl('quarry_hero_bg.jpg')}
       >

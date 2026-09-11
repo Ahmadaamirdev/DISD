@@ -52,6 +52,7 @@ function createContactShadowTexture() {
   ctx.fill();
 
   const texture = new THREE.CanvasTexture(canvas);
+  texture.premultiplyAlpha = false;
   return texture;
 }
 
@@ -67,17 +68,6 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
   const triggerIntroRef = useRef(null);
   const isSiteReadyRef = useRef(isSiteReady);
   const hasIntroTriggeredRef = useRef(false);
-
-  useEffect(() => {
-    isSiteReadyRef.current = isSiteReady;
-    if (isSiteReady) {
-      if (isModelReady && triggerIntroRef.current) {
-        triggerIntroRef.current();
-      } else {
-        setRevealPhase(8);
-      }
-    }
-  }, [isSiteReady, isModelReady]);
 
   // Dynamic Product Switcher State (Hydraulic Breaker <-> Electric Forklift)
   const [selectedProductId, setSelectedProductId] = useState('breaker');
@@ -105,6 +95,17 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
   const [isMobile, setIsMobile] = useState(() =>
     typeof window !== 'undefined' ? window.innerWidth < 768 : false
   );
+
+  useEffect(() => {
+    isSiteReadyRef.current = isSiteReady;
+    if (isSiteReady) {
+      if (isModelReady && triggerIntroRef.current) {
+        triggerIntroRef.current();
+      } else {
+        setRevealPhase(8);
+      }
+    }
+  }, [isSiteReady, isModelReady]);
 
   useEffect(() => {
     const handleWinResize = () => {
