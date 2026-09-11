@@ -1,12 +1,14 @@
 /**
  * Device Tier & WebGL Capability Detection Utility
  * 
- * Accurately classifies client hardware into 'high', 'medium', or 'low' performance tiers.
- * Allows adaptive 3D rendering:
- * - High Tier: Full dynamic PCF shadows, PMREM HDR environment reflections, capped 1.35 pixel ratio.
- * - Medium / Low Tier: Zero dynamic shadow overhead (uses soft baked contact shadow plane),
- *   capped 1.0 pixel ratio (saving 50-75% GPU fill-rate on high-DPI average screens),
- *   and on-demand asset fetching without network saturation.
+ * Accurately classifies client hardware into 'high', 'medium', 'low', or 'fallback' performance tiers.
+ * Uses multi-signal hardware profiling:
+ * - CPU Concurrency (navigator.hardwareConcurrency)
+ * - Device Memory (navigator.deviceMemory)
+ * - GPU Architecture & Vendor (WEBGL_debug_renderer_info)
+ * - WebGL Capabilities (MAX_TEXTURE_SIZE, MAX_RENDERBUFFER_SIZE)
+ * - Network Constraints (SaveData / Effective Type)
+ * - Screen Pixel Density & Touch/Mobile Form Factor
  */
 
 let cachedTier = null;
@@ -17,12 +19,15 @@ export function getDeviceTier() {
   if (typeof window === 'undefined') {
     return {
       tier: 'high',
+      quality: 'high',
       isMobile: false,
       isLowEnd: false,
+      isFallback: false,
       maxPixelRatio: 1.0,
       enableShadows: true,
       enablePMREM: true,
       preloadAlternateModel: false,
+      maxTextureSize: 8192,
     };
   }
 
@@ -34,57 +39,76 @@ export function getDeviceTier() {
   const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
   const isSlowConnection = connection ? (connection.saveData || connection.effectiveType === '2g' || connection.effectiveType === '3g') : false;
 
-  // Lightweight WebGL GPU Query
+  // Multi-signal WebGL GPU Query
   let gpuRenderer = '';
   let isSoftwareGpu = false;
   let isIntegratedGpu = false;
   let isDedicatedGpu = false;
+  let maxTextureSize = 4096;
+  let maxRenderBufferSize = 4096;
+  let hasWebgl = false;
 
   try {
     const canvas = document.createElement('canvas');
     canvas.width = 1;
     canvas.height = 1;
     const gl = canvas.getContext('webgl', { powerPreference: 'default' }) || canvas.getContext('experimental-webgl');
+    
     if (gl) {
+      hasWebgl = true;
+      maxTextureSize = gl.getParameter(gl.MAX_TEXTURE_SIZE) || 4096;
+      maxRenderBufferSize = gl.getParameter(gl.MAX_RENDERBUFFER_SIZE) || 4096;
+
       const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
       if (debugInfo) {
         gpuRenderer = (gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) || '').toLowerCase();
       }
       
       isSoftwareGpu = /swiftshader|llvmpipe|software|virtualbox|mesa generic/i.test(gpuRenderer);
-      isIntegratedGpu = /intel|mali-4|mali-t|adreno \(tm\) [345]|powervr/i.test(gpuRenderer);
+      isIntegratedGpu = /intel|mali-4|mali-t|mali-g5|adreno \(tm\) [345]|powervr/i.test(gpuRenderer);
       isDedicatedGpu = /nvidia|geforce|rtx|gtx|radeon|apple m|apple a1[5-9]|apple gpu/i.test(gpuRenderer);
 
       const loseContext = gl.getExtension('WEBGL_lose_context');
       if (loseContext) loseContext.loseContext();
     }
   } catch {
-    // Ignore WebGL detection error
+    hasWebgl = false;
   }
 
   let tier = 'medium';
 
-  if (isSoftwareGpu || isSlowConnection || (isMobile && (memory <= 3 || cores <= 4))) {
+  if (!hasWebgl || isSoftwareGpu) {
+    tier = 'fallback';
+  } else if (isSlowConnection || maxTextureSize < 4096 || (isMobile && (memory <= 3 || cores <= 4))) {
     tier = 'low';
-  } else if (!isMobile && isDedicatedGpu && cores >= 6 && memory >= 6) {
+  } else if (!isMobile && isDedicatedGpu && cores >= 6 && memory >= 6 && maxTextureSize >= 8192) {
     tier = 'high';
   } else if (isMobile && (isDedicatedGpu || (cores >= 8 && memory >= 6))) {
     tier = 'medium';
   } else if (isIntegratedGpu) {
-    tier = 'medium';
+    tier = cores <= 4 || memory <= 4 ? 'low' : 'medium';
   } else {
     tier = 'medium';
   }
 
+  const quality = tier === 'fallback' ? 'fallback' : tier;
+
   cachedTier = {
     tier,
+    quality,
     isMobile,
-    isLowEnd: tier === 'low',
-    maxPixelRatio: tier === 'high' ? Math.min(window.devicePixelRatio || 1, 1.35) : 1.0,
+    isLowEnd: tier === 'low' || tier === 'fallback',
+    isFallback: tier === 'fallback',
+    maxPixelRatio: tier === 'high' ? Math.min(window.devicePixelRatio || 1, 1.35) : (tier === 'low' ? 0.85 : 1.0),
     enableShadows: tier === 'high',
-    enablePMREM: tier !== 'low',
+    enablePMREM: tier === 'high' || tier === 'medium',
     preloadAlternateModel: tier === 'high',
+    maxTextureSize,
+    maxRenderBufferSize,
+    gpuRenderer,
   };
 
   return cachedTier;
 }
+
+export default getDeviceTier;

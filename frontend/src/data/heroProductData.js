@@ -15,6 +15,11 @@ export const heroProducts = {
     switcherLabel: 'Hydraulic Breaker',
     buttonPrompt: 'FORKLIFT',
     modelPath: getAssetUrl('/assets/tripo_pbr_model_4be6fa61-73bb-4da0-b263-fd93bf51e0cc_meshopt.glb'),
+    modelAssets: {
+      high: getAssetUrl('/assets/tripo_pbr_model_4be6fa61-73bb-4da0-b263-fd93bf51e0cc_meshopt.glb'),
+      medium: getAssetUrl('/assets/tripo_pbr_model_4be6fa61-73bb-4da0-b263-fd93bf51e0cc_meshopt.glb'),
+      low: getAssetUrl('/assets/tripo_pbr_model_4be6fa61-73bb-4da0-b263-fd93bf51e0cc_meshopt.glb'),
+    },
     posterImage: getAssetUrl('/assets/01.png'),
     targetDim: 2.65,
     cameraLookAtYRatio: 0.92,
@@ -113,6 +118,11 @@ export const heroProducts = {
     switcherLabel: 'Electric Forklift',
     buttonPrompt: 'BREAKER',
     modelPath: getAssetUrl('/assets/tripo_pbr_model_ee9cdc69-76a0-42b8-8eea-c47ed3342c9a_meshopt.glb'),
+    modelAssets: {
+      high: getAssetUrl('/assets/tripo_pbr_model_ee9cdc69-76a0-42b8-8eea-c47ed3342c9a_meshopt.glb'),
+      medium: getAssetUrl('/assets/tripo_pbr_model_ee9cdc69-76a0-42b8-8eea-c47ed3342c9a_meshopt.glb'),
+      low: getAssetUrl('/assets/tripo_pbr_model_ee9cdc69-76a0-42b8-8eea-c47ed3342c9a_meshopt.glb'),
+    },
     posterImage: getAssetUrl('/assets/02.png'),
     targetDim: 2.50,
     cameraLookAtYRatio: 0.88,
@@ -210,3 +220,18 @@ export const heroProducts = {
 
 // Default export for backward compatibility
 export const heroProductConfig = heroProducts.breaker;
+
+/**
+ * Resolves the optimal GLB model asset URL matching the detected device tier.
+ * Gracefully falls back to medium or high if specific variant is not specified.
+ */
+export function getModelAssetForTier(productConfig, tier = 'medium') {
+  if (!productConfig) return null;
+  if (productConfig.modelAssets) {
+    if (tier === 'high' && productConfig.modelAssets.high) return productConfig.modelAssets.high;
+    if (tier === 'low' && productConfig.modelAssets.low) return productConfig.modelAssets.low;
+    if (productConfig.modelAssets.medium) return productConfig.modelAssets.medium;
+    if (productConfig.modelAssets.high) return productConfig.modelAssets.high;
+  }
+  return productConfig.modelPath;
+}

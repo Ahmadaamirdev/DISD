@@ -6,7 +6,7 @@ import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.j
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 
 // Centralized Product & Specification Data
-import { heroProducts, heroProductConfig } from '../data/heroProductData.js';
+import { heroProducts, heroProductConfig, getModelAssetForTier } from '../data/heroProductData.js';
 
 // Modular Reusable Hero Components
 import HeroProductTitle from './hero/HeroProductTitle.jsx';
@@ -98,6 +98,7 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
   const activeHoverSpecRef = useRef(null);
   const activeSpecsRef = useRef(specifications);
   const updateCardPositionsRef = useRef(null);
+  const lastScreenCoordsRef = useRef({});
 
   useEffect(() => {
     activeSpecsRef.current = specifications;
@@ -131,7 +132,6 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
     const nextId = selectedProductId === 'breaker' ? 'forklift' : 'breaker';
     setActiveHoverId(null);
     setIsCrossfading(true);
-    setIsModelReady(false);
 
     setTimeout(() => {
       setSelectedProductId(nextId);
@@ -186,13 +186,25 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
     canvas.addEventListener('webglcontextrestored', handleContextRestored, false);
 
     // 3. WebGL Renderer with ACES Tone Mapping & Adaptive Hardware Capabilities
+    if (deviceTier.isFallback) {
+      setWebglUnavailable(true);
+      setIsLoading(false);
+      setIsModelReady(false);
+      setRevealPhase(8);
+      if (onModelLoaded) onModelLoaded();
+      return () => {
+        canvas.removeEventListener('webglcontextlost', handleContextLost);
+        canvas.removeEventListener('webglcontextrestored', handleContextRestored);
+      };
+    }
+
     let renderer;
     try {
       renderer = new THREE.WebGLRenderer({
         canvas,
-        antialias: deviceTier.tier !== 'low',
+        antialias: deviceTier.tier === 'high',
         alpha: true,
-        powerPreference: 'high-performance',
+        powerPreference: deviceTier.tier === 'high' ? 'high-performance' : 'default',
       });
     } catch (err) {
       console.warn('WebGL context creation failed:', err);
@@ -200,6 +212,7 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
       setIsLoading(false);
       setIsModelReady(false);
       setRevealPhase(8);
+      if (onModelLoaded) onModelLoaded();
       return () => {
         canvas.removeEventListener('webglcontextlost', handleContextLost);
         canvas.removeEventListener('webglcontextrestored', handleContextRestored);
@@ -513,10 +526,14 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
         const loader = new GLTFLoader();
         loader.setMeshoptDecoder(MeshoptDecoder);
 
+        const assetUrl = getModelAssetForTier(prodConfig, deviceTier.quality);
+        const loadStartTime = performance.now();
+
         loader.load(
-          prodConfig.modelPath,
+          assetUrl,
           (gltf) => {
             if (isDisposed) return;
+            const loadDuration = (performance.now() - loadStartTime).toFixed(1);
 
             // Texture safety & memory optimization for average GPUs
             try {
@@ -544,6 +561,15 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
 
             modelCache[prodId] = gltf.scene;
             setupAndDisplayModel(gltf.scene);
+
+            if (import.meta.env.DEV) {
+              console.log(`[Hero3DStudio] 3D Model loaded for Tier: ${deviceTier.tier} (${deviceTier.quality}) in ${loadDuration}ms`, {
+                triangles: renderer?.info?.render?.triangles || 0,
+                drawCalls: renderer?.info?.render?.calls || 0,
+                geometries: renderer?.info?.memory?.geometries || 0,
+                textures: renderer?.info?.memory?.textures || 0,
+              });
+            }
           },
           (xhr) => {
             if (xhr.total > 0) {
@@ -827,22 +853,30 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
           }
           const cachedCard = cardPositionsRef.current[spec.id] || cardPositionsRef.current[spec.order];
 
-          if (markerEl) {
-            markerEl.style.transform = `translate(${screenX.toFixed(1)}px, ${screenY.toFixed(1)}px)`;
-            markerEl.style.opacity = isBehind ? '0' : '1';
-          }
+          // Check if coordinate changed by more than 0.25px before touching DOM
+          const lastCoords = lastScreenCoordsRef.current[specKey];
+          const hasMoved = !lastCoords || Math.abs(lastCoords.x - screenX) > 0.25 || Math.abs(lastCoords.y - screenY) > 0.25 || lastCoords.isBehind !== isBehind;
 
-          if (lineEl && cachedCard) {
-            if (isBehind) {
-              lineEl.style.opacity = '0';
-            } else {
-              lineEl.style.opacity = '0.75';
-              const targetX = spec.side === 'left' ? cachedCard.right : cachedCard.left;
-              const targetY = cachedCard.top + cachedCard.height * 0.42;
+          if (hasMoved) {
+            lastScreenCoordsRef.current[specKey] = { x: screenX, y: screenY, isBehind };
 
-              const elbowX = spec.side === 'left' ? targetX + 38 : targetX - 38;
-              const pathD = `M ${screenX.toFixed(1)} ${screenY.toFixed(1)} L ${elbowX.toFixed(1)} ${targetY.toFixed(1)} L ${targetX.toFixed(1)} ${targetY.toFixed(1)}`;
-              lineEl.setAttribute('d', pathD);
+            if (markerEl) {
+              markerEl.style.transform = `translate(${screenX.toFixed(1)}px, ${screenY.toFixed(1)}px)`;
+              markerEl.style.opacity = isBehind ? '0' : '1';
+            }
+
+            if (lineEl && cachedCard) {
+              if (isBehind) {
+                lineEl.style.opacity = '0';
+              } else {
+                lineEl.style.opacity = '0.75';
+                const targetX = spec.side === 'left' ? cachedCard.right : cachedCard.left;
+                const targetY = cachedCard.top + cachedCard.height * 0.42;
+
+                const elbowX = spec.side === 'left' ? targetX + 38 : targetX - 38;
+                const pathD = `M ${screenX.toFixed(1)} ${screenY.toFixed(1)} L ${elbowX.toFixed(1)} ${targetY.toFixed(1)} L ${targetX.toFixed(1)} ${targetY.toFixed(1)}`;
+                lineEl.setAttribute('d', pathD);
+              }
             }
           }
         });
@@ -990,33 +1024,33 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
           innerRef={bgTextRef}
         />
 
-        {/* 1.5 POSTER-FIRST FALLBACK & PRELOAD VISUAL (zIndex 2) */}
-        <div
-          className="disd-hero-poster-wrapper"
-          style={{
-            position: 'absolute',
-            inset: 0,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            pointerEvents: 'none',
-            zIndex: 2,
-            opacity: isModelReady ? 0 : (revealPhase >= 1 ? 1 : 0),
-            transition: 'opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1)',
-          }}
-        >
+        {/* 1.5 POSTER-FIRST VISUAL & FALLBACK (zIndex 2) */}
+        {activeProduct.posterImage && (
           <div
+            className="disd-hero-poster-wrapper"
             style={{
-              position: 'relative',
-              width: 'min(90vw, 560px)',
-              height: 'min(50vh, 440px)',
+              position: 'absolute',
+              inset: 0,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              marginTop: '-2vh',
+              pointerEvents: 'none',
+              zIndex: 2,
+              opacity: (isModelReady && !webglUnavailable) ? 0 : 1,
+              transition: 'opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1)',
             }}
           >
-            {activeProduct.posterImage && (
+            <div
+              style={{
+                position: 'relative',
+                width: 'min(90vw, 560px)',
+                height: 'min(50vh, 440px)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginTop: '-2vh',
+              }}
+            >
               <img
                 src={activeProduct.posterImage}
                 alt={product.name}
@@ -1029,32 +1063,34 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
                   transition: 'transform 0.3s ease',
                 }}
               />
-            )}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* 2. THREE.JS 3D CANVAS (Continuous WebGL Canvas, zIndex 3) */}
-        <canvas
-          ref={canvasRef}
-          style={{
-            position: 'absolute',
-            inset: 0,
-            display: 'block',
-            width: '100%',
-            height: '100%',
-            outline: 'none',
-            zIndex: 3,
-            opacity: (revealPhase >= 2 && isModelReady) ? 1 : 0,
-            transform: (revealPhase >= 2 && isModelReady)
-              ? 'scale(1) translateY(0)'
-              : 'scale(0.975) translateY(10px)',
-            transition: reducedMotion
-              ? 'opacity 0.3s ease'
-              : 'opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1), transform 1.2s cubic-bezier(0.16, 1, 0.3, 1)',
-            willChange: 'opacity, transform',
-            contain: 'strict',
-          }}
-        />
+        {!webglUnavailable && (
+          <canvas
+            ref={canvasRef}
+            style={{
+              position: 'absolute',
+              inset: 0,
+              display: 'block',
+              width: '100%',
+              height: '100%',
+              outline: 'none',
+              zIndex: 3,
+              opacity: (revealPhase >= 2 && isModelReady) ? 1 : 0,
+              transform: (revealPhase >= 2 && isModelReady)
+                ? 'scale(1) translateY(0)'
+                : 'scale(0.975) translateY(10px)',
+              transition: reducedMotion
+                ? 'opacity 0.3s ease'
+                : 'opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1), transform 1.2s cubic-bezier(0.16, 1, 0.3, 1)',
+              willChange: 'opacity, transform',
+              contain: 'strict',
+            }}
+          />
+        )}
 
         {/* 3. DYNAMIC TECHNICAL CONNECTOR LINES (zIndex 3) */}
         <svg

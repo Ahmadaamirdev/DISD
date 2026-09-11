@@ -132,10 +132,6 @@ export default function ProductCatalog({ selectedCategory: propCategory, onSelec
 
                   {/* Card Body */}
                   <div className="disd-prod-body">
-                    <p className="disd-prod-desc">
-                      {prod.description}
-                    </p>
-
                     {/* Specifications Table */}
                     <div className="disd-specs-table">
                       {prod.specifications?.operatingWeight && (
@@ -163,9 +159,9 @@ export default function ProductCatalog({ selectedCategory: propCategory, onSelec
                 {/* Action Buttons */}
                 <div className="disd-prod-actions">
                   <button
-                    onClick={() => setActiveModalProduct(prod)}
                     className="disd-btn-sheet"
                     type="button"
+                    aria-label="Spec Sheet"
                   >
                     <span>Spec Sheet</span>
                     <ArrowUpRight size={14} />

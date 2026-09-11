@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
+import { getDeviceTier } from '../utils/deviceTier.js';
 
 // Pre-warm Meshopt WASM decoder immediately on module load
 if (typeof window !== 'undefined' && MeshoptDecoder && MeshoptDecoder.ready) {
@@ -194,15 +195,26 @@ export default function CategoryCard3DViewer({ modelPath, isHovered, title = 'Eq
   const isHoveredRef = useRef(isHovered);
   isHoveredRef.current = isHovered;
 
-  // Initialize WebGL context strictly on desktop user hover (avoids 5 concurrent contexts & mobile crashes)
+  // Initialize WebGL context strictly on desktop user hover with 180ms hover-intent delay
+  // Prevents sweeping mouse across 5 cards from triggering 5 simultaneous WebGL context creations
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const isTouchOrMobile = window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 1024;
     if (isTouchOrMobile) return; // Touch & mobile devices use the optimized poster image with zero WebGL overhead
 
+    const deviceTier = getDeviceTier();
+    if (deviceTier.isFallback) return;
+
+    let timer;
     if (isHovered && !hasStartedInit) {
-      setHasStartedInit(true);
+      timer = setTimeout(() => {
+        setHasStartedInit(true);
+      }, 180);
     }
+
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
   }, [isHovered, hasStartedInit]);
 
   // Set up Three.js Scene and Renderer ONCE per card
@@ -226,14 +238,14 @@ export default function CategoryCard3DViewer({ modelPath, isHovered, title = 'Eq
     camera.lookAt(0, 0, 0);
     cameraRef.current = camera;
 
-    // 3. Renderer with hardware-accelerated settings & capped pixel ratio for performance
+    // 3. Renderer with hardware-accelerated settings & adaptive pixel ratio
+    const deviceTier = getDeviceTier();
     const renderer = new THREE.WebGLRenderer({
-      antialias: true,
+      antialias: deviceTier.tier === 'high',
       alpha: true,
-      powerPreference: 'high-performance'
+      powerPreference: deviceTier.tier === 'high' ? 'high-performance' : 'default',
     });
-    // Cap pixel ratio to 1.5 to save 50%+ GPU fill-rate on high-DPI screens without visual loss
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+    renderer.setPixelRatio(deviceTier.maxPixelRatio);
     renderer.setSize(width, height);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -444,21 +456,6 @@ export default function CategoryCard3DViewer({ modelPath, isHovered, title = 'Eq
       className={`disd-card-3d-viewer ${isHovered ? 'active' : ''}`}
       aria-label={`${title} 3D interactive viewer`}
     >
-      {/* Instant 2D Silhouette Poster Backdrop: Prevents blank space while model prepares */}
-      {posterImage && (
-        <div className={`disd-card-3d-poster-wrap ${isModelReady ? 'fade-out' : 'visible'}`}>
-          <img
-            src={posterImage}
-            alt={title}
-            className="disd-card-3d-poster-img"
-            loading="eager"
-            decoding="async"
-            width="220"
-            height="180"
-          />
-        </div>
-      )}
-
       {/* Persistent Canvas Container */}
       <div
         ref={mountRef}

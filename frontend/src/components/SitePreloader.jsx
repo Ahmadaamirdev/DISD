@@ -11,11 +11,9 @@ import { getAssetUrl } from '../data/cloudinaryAssets';
  * - Zero-overhead lightweight background polling (freeing 100% of the main JS thread for 3D model prep)
  * - Crisp vector orbital guide ring beneath the gliding crescents
  */
-export default function SitePreloader({ isModelLoaded = false, onStartExit, onComplete }) {
+export default function SitePreloader({ onStartExit, onComplete }) {
   const [isExiting, setIsExiting] = useState(false);
-  const startTimeRef = useRef(Date.now());
-  const MIN_DURATION = 3200; // 3.2s cinematic presentation duration
-  const MAX_WAIT = 4000; // 4.0s safety limit
+  const PRESENTATION_DURATION = 2800; // 2.8s smooth cinematic brand presentation
 
   const bgAmbientUrl = getAssetUrl('loader_bg_ambient.png');
   const ringUrl = getAssetUrl('loader_ring_exact.png');
@@ -26,27 +24,21 @@ export default function SitePreloader({ isModelLoaded = false, onStartExit, onCo
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
 
-    // Zero-overhead interval check (frees CPU & GPU cycles exclusively for smooth animation)
-    const interval = setInterval(() => {
-      const elapsed = Date.now() - startTimeRef.current;
-      const isSafeToComplete = isModelLoaded || elapsed >= MAX_WAIT;
-
-      if (elapsed >= MIN_DURATION && isSafeToComplete) {
-        clearInterval(interval);
-        setIsExiting(true);
-        if (onStartExit) onStartExit();
-        setTimeout(() => {
-          document.body.style.overflow = originalOverflow;
-          if (onComplete) onComplete();
-        }, 850);
-      }
-    }, 100);
+    // Poster-first decoupling: Runs brand presentation and gracefully hands off to page
+    const timer = setTimeout(() => {
+      setIsExiting(true);
+      if (onStartExit) onStartExit();
+      setTimeout(() => {
+        document.body.style.overflow = originalOverflow;
+        if (onComplete) onComplete();
+      }, 850);
+    }, PRESENTATION_DURATION);
 
     return () => {
-      clearInterval(interval);
+      clearTimeout(timer);
       document.body.style.overflow = originalOverflow;
     };
-  }, [isModelLoaded, onStartExit, onComplete]);
+  }, [onStartExit, onComplete]);
 
   return (
     <div
