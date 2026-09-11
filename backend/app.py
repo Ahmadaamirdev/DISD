@@ -19,6 +19,9 @@ PORT = int(os.getenv("PORT", 8085))
 PRODUCTS_FILE = os.path.join(BASE_DIR, "data", "products.json")
 INQUIRIES_FILE = os.path.join(BASE_DIR, "data", "inquiries.json")
 
+# In-memory inquiry store — used as fallback when filesystem is read-only (e.g. Vercel)
+_INQUIRIES_MEMORY = []
+
 def load_products():
     if os.path.exists(PRODUCTS_FILE):
         try:
@@ -29,22 +32,28 @@ def load_products():
     return []
 
 def load_inquiries():
+    # Prefer file-based store; fall back to in-memory if unavailable
     if os.path.exists(INQUIRIES_FILE):
         try:
             with open(INQUIRIES_FILE, "r", encoding="utf-8") as f:
-                return json.load(f)
+                data = json.load(f)
+                # Merge with any in-memory additions not yet on disk
+                ids_on_disk = {i.get("referenceNumber") for i in data}
+                extras = [i for i in _INQUIRIES_MEMORY if i.get("referenceNumber") not in ids_on_disk]
+                return extras + data
         except Exception:
             pass
-    return []
+    return list(_INQUIRIES_MEMORY)
 
 def save_inquiry(inquiry):
-    items = load_inquiries()
-    items.insert(0, inquiry)
+    _INQUIRIES_MEMORY.insert(0, inquiry)
     try:
+        items = load_inquiries()
         with open(INQUIRIES_FILE, "w", encoding="utf-8") as f:
             json.dump(items, f, indent=2, ensure_ascii=False)
-    except Exception as e:
-        print(f"[API] Error saving inquiry: {e}")
+    except Exception:
+        # Read-only filesystem (e.g. Vercel) — in-memory store already updated above
+        pass
     return inquiry
 
 @app.route("/api/health", methods=["GET"])
