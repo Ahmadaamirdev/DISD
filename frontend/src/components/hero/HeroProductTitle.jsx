@@ -16,15 +16,18 @@ export default function HeroProductTitle({
   revealPhase = 8,
   reducedMotion = false,
   innerRef,
+  selectedProductId = 'breaker',
+  onToggleProduct,
 }) {
   const isRevealed = revealPhase >= 4;
 
   return (
     <div
       ref={innerRef}
+      className="disd-hero-title-container"
       style={{
         position: 'absolute',
-        top: 'clamp(24px, 4.5vh, 40px)',
+        top: 'clamp(20px, 4.2vh, 40px)',
         left: 0,
         right: 0,
         display: 'flex',
@@ -40,18 +43,19 @@ export default function HeroProductTitle({
         transition: reducedMotion
           ? 'opacity 0.3s ease'
           : 'opacity 1.4s cubic-bezier(0.16, 1, 0.3, 1), transform 1.4s cubic-bezier(0.16, 1, 0.3, 1)',
-        padding: '0 20px',
+        padding: '0 16px',
       }}
     >
       {/* 1. Category / Organization */}
       <div
+        className="hero-title-category"
         style={{
-          fontSize: 'clamp(10px, 1.1vw, 11px)',
+          fontSize: 'clamp(9px, 2.2vw, 11px)',
           fontWeight: 800,
-          letterSpacing: '2.5px',
+          letterSpacing: 'clamp(1.2px, 0.4vw, 2.5px)',
           color: '#FF8A1A',
           textTransform: 'uppercase',
-          marginBottom: 6,
+          marginBottom: 5,
         }}
       >
         {product.category}
@@ -59,9 +63,10 @@ export default function HeroProductTitle({
 
       {/* 2. Primary Product Name */}
       <h1
+        className="hero-title-name"
         style={{
           margin: 0,
-          fontSize: 'clamp(18px, 2.2vw, 28px)',
+          fontSize: 'clamp(17px, 4.4vw, 28px)',
           fontWeight: 800,
           letterSpacing: '-0.3px',
           color: '#F4EFEA',
@@ -74,16 +79,51 @@ export default function HeroProductTitle({
 
       {/* 3. Series / Standard Subtitle */}
       <div
+        className="hero-title-model"
         style={{
-          fontSize: 'clamp(10px, 1vw, 11px)',
+          fontSize: 'clamp(9px, 2vw, 11px)',
           fontWeight: 600,
-          letterSpacing: '1.8px',
+          letterSpacing: 'clamp(0.8px, 0.3vw, 1.8px)',
           color: '#8E857B',
           textTransform: 'uppercase',
-          marginTop: 5,
+          marginTop: 4,
         }}
       >
         {product.model}
+      </div>
+
+      {/* 4. Mobile Product Switcher Button (centered directly below subtitle, mobile only) */}
+      <div className="disd-mobile-switcher-wrapper">
+        <button
+          type="button"
+          onPointerDown={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
+          onTouchStart={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onToggleProduct && onToggleProduct();
+          }}
+          aria-label={selectedProductId === 'breaker' ? 'Switch to Forklift' : 'Switch to Breaker'}
+          className="disd-model-switcher-btn disd-mobile-switcher-btn"
+        >
+          <span className="switcher-btn-text">
+            {selectedProductId === 'breaker' ? 'FORKLIFT' : 'BREAKER'}
+          </span>
+          <svg
+            width="12"
+            height="12"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#FF8A1A"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="switcher-btn-arrow"
+          >
+            <polyline points="9 18 15 12 9 6" />
+          </svg>
+        </button>
       </div>
     </div>
   );
