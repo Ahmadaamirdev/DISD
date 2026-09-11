@@ -56,6 +56,8 @@ def save_inquiry(inquiry):
         pass
     return inquiry
 
+@app.route("/", methods=["GET"])
+@app.route("/api", methods=["GET"])
 @app.route("/api/health", methods=["GET"])
 def health():
     return jsonify({
