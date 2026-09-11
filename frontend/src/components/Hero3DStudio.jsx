@@ -101,6 +101,19 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
   // Accessibility: prefers-reduced-motion
   const [reducedMotion, setReducedMotion] = useState(false);
 
+  // Responsive mobile detection (< 768px)
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth < 768 : false
+  );
+
+  useEffect(() => {
+    const handleWinResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    window.addEventListener('resize', handleWinResize);
+    return () => window.removeEventListener('resize', handleWinResize);
+  }, []);
+
   // Active hover spec ref for 3D feature illumination in render loop
   const activeHoverSpecRef = useRef(null);
   const activeSpecsRef = useRef(specifications);
@@ -175,7 +188,7 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
       0.1,
       100
     );
-    const initialCamPos = new THREE.Vector3(0, 2.1, 5.6);
+    const initialCamPos = new THREE.Vector3(0, 2.1, getWidth() < 768 ? 8.5 : 5.6);
     camera.position.copy(initialCamPos);
 
     // Context loss prevention: Prevent default and fall back smoothly to poster image
@@ -432,9 +445,13 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
         targetLookAt.set(0, finalCenter.y * (prodConfig.cameraLookAtYRatio || 0.92), 0);
         controls.target.copy(targetLookAt);
 
+        const isMobileScreen = getWidth() < 768;
+        const targetCamZ = isMobileScreen ? 8.5 : 5.6;
+        const targetCamY = finalCenter.y * (isMobileScreen ? 1.08 : 1.05);
+
         if (isInitial) {
-          camStartPos.set(0.1, finalCenter.y * 3.5, 4.2);
-          camEndPos.set(0, finalCenter.y * 1.05, 5.6);
+          camStartPos.set(0.1, finalCenter.y * (isMobileScreen ? 3.6 : 3.5), isMobileScreen ? 6.0 : 4.2);
+          camEndPos.set(0, targetCamY, targetCamZ);
           camera.position.copy(camStartPos);
           camera.lookAt(targetLookAt);
 
@@ -456,7 +473,7 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
             // fallback gracefully
           }
         } else {
-          camEndPos.set(0, finalCenter.y * 1.05, 5.6);
+          camEndPos.set(0, targetCamY, targetCamZ);
           camera.position.copy(camEndPos);
           camera.lookAt(targetLookAt);
 
@@ -680,6 +697,12 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
       renderer.setSize(width, height, false);
+
+      const isMobileScreen = width < 768;
+      const targetCamZ = isMobileScreen ? 8.5 : 5.6;
+      const targetCamY = finalCenter.y * (isMobileScreen ? 1.08 : 1.05);
+      camEndPos.set(0, targetCamY, targetCamZ);
+
       try {
         renderer.render(scene, camera);
       } catch (e) { }
@@ -839,11 +862,12 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
       // Render 3D scene smoothly
       renderer.render(scene, camera);
 
-      // Dynamic 3D Anchor Projection: Uses CACHED card coordinates & CACHED DOM elements (Desktop only)
-      if (loadedModel && svgRef.current && !isMobile) {
+      // Dynamic 3D Anchor Projection: Uses CACHED card coordinates & CACHED DOM elements
+      if (loadedModel && svgRef.current) {
         const width = getWidth();
         const height = getHeight();
         const currentSpecs = activeSpecsRef.current || specifications;
+        const isMobileScreen = width < 768;
 
         currentSpecs.forEach((spec, idx) => {
           if (!animatedAnchors[idx]) {
@@ -899,7 +923,10 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
                 const targetX = spec.side === 'left' ? cachedCard.right : cachedCard.left;
                 const targetY = cachedCard.top + cachedCard.height * 0.42;
 
-                const elbowX = spec.side === 'left' ? targetX + 38 : targetX - 38;
+                const elbowX = isMobileScreen
+                  ? (spec.side === 'left' ? Math.min(targetX + 16, (targetX + screenX) * 0.5) : Math.max(targetX - 16, (targetX + screenX) * 0.5))
+                  : (spec.side === 'left' ? targetX + 38 : targetX - 38);
+
                 const pathD = `M ${screenX.toFixed(1)} ${screenY.toFixed(1)} L ${elbowX.toFixed(1)} ${targetY.toFixed(1)} L ${targetX.toFixed(1)} ${targetY.toFixed(1)}`;
                 lineEl.setAttribute('d', pathD);
               }
@@ -968,8 +995,9 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
       style={{
         position: 'relative',
         width: '100%',
-        height: 'calc(100vh - 84px)',
-        minHeight: '680px',
+        height: isMobile ? 'clamp(620px, 73vh, 740px)' : 'calc(100vh - 84px)',
+        minHeight: isMobile ? '580px' : '680px',
+        maxHeight: isMobile ? '750px' : 'none',
         overflow: 'hidden',
         backgroundColor: '#211F1C',
         background: 'radial-gradient(ellipse at 50% 48%, #36322B 0%, #2B2925 42%, #211F1C 74%, #181714 100%)',
@@ -985,8 +1013,8 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
       <div
         style={{
           position: 'absolute',
-          top: 'clamp(28px, 4.5vh, 44px)',
-          right: 'clamp(24px, 4.5vw, 68px)',
+          top: isMobile ? 'clamp(12px, 2.2vh, 20px)' : 'clamp(28px, 4.5vh, 44px)',
+          right: isMobile ? '14px' : 'clamp(24px, 4.5vw, 68px)',
           zIndex: 25,
           pointerEvents: 'auto',
         }}
@@ -1178,62 +1206,183 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
           revealPhase={revealPhase}
           reducedMotion={reducedMotion}
           innerRef={headerRef}
+          isMobile={isMobile}
         />
 
-        {/* 6. SPECIFICATION CALLOUTS: LEFT & RIGHT COLUMNS (zIndex 5) */}
-        <div
-          ref={specsContainerRef}
-          style={{
-            position: 'absolute',
-            inset: 0,
-            pointerEvents: 'none',
-            zIndex: 5,
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            padding: '0 clamp(20px, 4.5vw, 90px)',
-            transition: 'opacity 0.25s ease',
-          }}
-        >
-          {/* LEFT COLUMN: 2 Specifications */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(60px, 12vh, 120px)' }}>
-            {leftSpecs.map((spec) => (
-              <div key={spec.id} className={spec.order > 2 ? 'hero-spec-secondary' : ''}>
-                <HeroSpecification
-                  spec={spec}
-                  isHovered={activeHoverId === spec.id}
-                  isOtherHovered={activeHoverId && activeHoverId !== spec.id}
-                  revealPhase={revealPhase}
-                  reducedMotion={reducedMotion}
-                  onMouseEnter={setActiveHoverId}
-                  onMouseLeave={() => setActiveHoverId(null)}
-                  onClick={handleSpecSelect}
-                  registerCardRef={registerCardRef}
-                />
-              </div>
-            ))}
-          </div>
+        {/* 6. SPECIFICATION CALLOUTS (zIndex 5) */}
+        {/* DESKTOP LAYOUT: Left & Right Balanced Columns */}
+        {!isMobile && (
+          <div
+            ref={specsContainerRef}
+            style={{
+              position: 'absolute',
+              inset: 0,
+              pointerEvents: 'none',
+              zIndex: 5,
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: '0 clamp(20px, 4.5vw, 90px)',
+              transition: 'opacity 0.25s ease',
+            }}
+          >
+            {/* LEFT COLUMN: 2 Specifications */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(60px, 12vh, 120px)' }}>
+              {leftSpecs.map((spec) => (
+                <div key={spec.id}>
+                  <HeroSpecification
+                    spec={spec}
+                    isHovered={activeHoverId === spec.id}
+                    isOtherHovered={activeHoverId && activeHoverId !== spec.id}
+                    revealPhase={revealPhase}
+                    reducedMotion={reducedMotion}
+                    onMouseEnter={setActiveHoverId}
+                    onMouseLeave={() => setActiveHoverId(null)}
+                    onClick={handleSpecSelect}
+                    registerCardRef={registerCardRef}
+                    isMobile={false}
+                  />
+                </div>
+              ))}
+            </div>
 
-          {/* RIGHT COLUMN: 2 Specifications */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(60px, 12vh, 120px)' }}>
-            {rightSpecs.map((spec) => (
-              <div key={spec.id} className={spec.order > 2 ? 'hero-spec-secondary' : ''}>
+            {/* RIGHT COLUMN: 2 Specifications */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(60px, 12vh, 120px)' }}>
+              {rightSpecs.map((spec) => (
+                <div key={spec.id}>
+                  <HeroSpecification
+                    spec={spec}
+                    isHovered={activeHoverId === spec.id}
+                    isOtherHovered={activeHoverId && activeHoverId !== spec.id}
+                    revealPhase={revealPhase}
+                    reducedMotion={reducedMotion}
+                    onMouseEnter={setActiveHoverId}
+                    onMouseLeave={() => setActiveHoverId(null)}
+                    onClick={handleSpecSelect}
+                    registerCardRef={registerCardRef}
+                    isMobile={false}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* MOBILE DEDICATED COMPOSITION: 4 Floating Callouts Surrounding the Machine */}
+        {isMobile && (
+          <div
+            ref={specsContainerRef}
+            style={{
+              position: 'absolute',
+              inset: 0,
+              pointerEvents: 'none',
+              zIndex: 5,
+              transition: 'opacity 0.25s ease',
+            }}
+          >
+            {/* 01: Top-Left Quadrant */}
+            {leftSpecs[0] && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '22%',
+                  left: '12px',
+                  pointerEvents: 'auto',
+                }}
+              >
                 <HeroSpecification
-                  spec={spec}
-                  isHovered={activeHoverId === spec.id}
-                  isOtherHovered={activeHoverId && activeHoverId !== spec.id}
+                  spec={leftSpecs[0]}
+                  isHovered={activeHoverId === leftSpecs[0].id}
+                  isOtherHovered={activeHoverId && activeHoverId !== leftSpecs[0].id}
                   revealPhase={revealPhase}
                   reducedMotion={reducedMotion}
                   onMouseEnter={setActiveHoverId}
                   onMouseLeave={() => setActiveHoverId(null)}
                   onClick={handleSpecSelect}
                   registerCardRef={registerCardRef}
+                  isMobile={true}
                 />
               </div>
-            ))}
+            )}
+
+            {/* 02: Bottom-Left Quadrant */}
+            {leftSpecs[1] && (
+              <div
+                style={{
+                  position: 'absolute',
+                  bottom: '10%',
+                  left: '12px',
+                  pointerEvents: 'auto',
+                }}
+              >
+                <HeroSpecification
+                  spec={leftSpecs[1]}
+                  isHovered={activeHoverId === leftSpecs[1].id}
+                  isOtherHovered={activeHoverId && activeHoverId !== leftSpecs[1].id}
+                  revealPhase={revealPhase}
+                  reducedMotion={reducedMotion}
+                  onMouseEnter={setActiveHoverId}
+                  onMouseLeave={() => setActiveHoverId(null)}
+                  onClick={handleSpecSelect}
+                  registerCardRef={registerCardRef}
+                  isMobile={true}
+                />
+              </div>
+            )}
+
+            {/* 03: Top-Right Quadrant */}
+            {rightSpecs[0] && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '22%',
+                  right: '12px',
+                  pointerEvents: 'auto',
+                }}
+              >
+                <HeroSpecification
+                  spec={rightSpecs[0]}
+                  isHovered={activeHoverId === rightSpecs[0].id}
+                  isOtherHovered={activeHoverId && activeHoverId !== rightSpecs[0].id}
+                  revealPhase={revealPhase}
+                  reducedMotion={reducedMotion}
+                  onMouseEnter={setActiveHoverId}
+                  onMouseLeave={() => setActiveHoverId(null)}
+                  onClick={handleSpecSelect}
+                  registerCardRef={registerCardRef}
+                  isMobile={true}
+                />
+              </div>
+            )}
+
+            {/* 04: Bottom-Right Quadrant */}
+            {rightSpecs[1] && (
+              <div
+                style={{
+                  position: 'absolute',
+                  bottom: '10%',
+                  right: '12px',
+                  pointerEvents: 'auto',
+                }}
+              >
+                <HeroSpecification
+                  spec={rightSpecs[1]}
+                  isHovered={activeHoverId === rightSpecs[1].id}
+                  isOtherHovered={activeHoverId && activeHoverId !== rightSpecs[1].id}
+                  revealPhase={revealPhase}
+                  reducedMotion={reducedMotion}
+                  onMouseEnter={setActiveHoverId}
+                  onMouseLeave={() => setActiveHoverId(null)}
+                  onClick={handleSpecSelect}
+                  registerCardRef={registerCardRef}
+                  isMobile={true}
+                />
+              </div>
+            )}
           </div>
-        </div>
+        )}
       </div>
+
       {/* 7. SCROLL TO EXPLORE TRIGGER */}
       <div
         role="button"
@@ -1248,13 +1397,13 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
         }}
         style={{
           position: 'absolute',
-          bottom: 24,
+          bottom: isMobile ? 12 : 24,
           left: '50%',
           transform: revealPhase >= 8 ? 'translateX(-50%) translateY(0)' : 'translateX(-50%) translateY(8px)',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          gap: 5,
+          gap: isMobile ? 4 : 5,
           cursor: 'pointer',
           pointerEvents: 'auto',
           zIndex: 5,
@@ -1266,7 +1415,7 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
         }}
         className="disd-explore-trigger"
       >
-        <span style={{ letterSpacing: '2.2px', fontSize: 10, color: '#A3998D', fontWeight: 700, textTransform: 'uppercase', transition: 'color 0.25s ease' }}>
+        <span style={{ letterSpacing: isMobile ? '1.8px' : '2.2px', fontSize: isMobile ? 9 : 10, color: '#A3998D', fontWeight: 700, textTransform: 'uppercase', transition: 'color 0.25s ease' }}>
           SCROLL TO EXPLORE
         </span>
         <svg width="12" height="14" viewBox="0 0 12 14" fill="none" style={{ animation: reducedMotion ? 'none' : 'bounceSlow 3.4s infinite ease-in-out' }}>
@@ -1439,9 +1588,6 @@ export default function Hero3DStudio({ onOpenQuoteModal, onModelLoaded, isSiteRe
           transform: translateX(3px);
         }
         @media (max-width: 640px) {
-          .hero-spec-secondary {
-            display: none !important;
-          }
           .disd-model-switcher-btn {
             padding: 6px 14px;
             font-size: 11px;

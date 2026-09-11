@@ -16,6 +16,7 @@ export default function HeroProductTitle({
   revealPhase = 8,
   reducedMotion = false,
   innerRef,
+  isMobile = false,
 }) {
   const isRevealed = revealPhase >= 4;
 
@@ -24,7 +25,7 @@ export default function HeroProductTitle({
       ref={innerRef}
       style={{
         position: 'absolute',
-        top: 'clamp(24px, 4.5vh, 40px)',
+        top: isMobile ? 'clamp(44px, 6.2vh, 52px)' : 'clamp(14px, 3.5vh, 40px)',
         left: 0,
         right: 0,
         display: 'flex',
@@ -40,18 +41,18 @@ export default function HeroProductTitle({
         transition: reducedMotion
           ? 'opacity 0.3s ease'
           : 'opacity 1.4s cubic-bezier(0.16, 1, 0.3, 1), transform 1.4s cubic-bezier(0.16, 1, 0.3, 1)',
-        padding: '0 20px',
+        padding: '0 clamp(12px, 3vw, 20px)',
       }}
     >
       {/* 1. Category / Organization */}
       <div
         style={{
-          fontSize: 'clamp(10px, 1.1vw, 11px)',
+          fontSize: 'clamp(8.5px, 1vw, 11px)',
           fontWeight: 800,
-          letterSpacing: '2.5px',
+          letterSpacing: 'clamp(1.6px, 0.3vw, 2.5px)',
           color: '#FF8A1A',
           textTransform: 'uppercase',
-          marginBottom: 6,
+          marginBottom: 3,
         }}
       >
         {product.category}
@@ -61,12 +62,13 @@ export default function HeroProductTitle({
       <h1
         style={{
           margin: 0,
-          fontSize: 'clamp(18px, 2.2vw, 28px)',
+          fontSize: 'clamp(16px, 2.2vw, 28px)',
           fontWeight: 800,
           letterSpacing: '-0.3px',
           color: '#F4EFEA',
           fontFamily: "'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif",
-          lineHeight: 1.2,
+          lineHeight: 1.18,
+          maxWidth: '92%',
         }}
       >
         {product.name}
@@ -75,12 +77,12 @@ export default function HeroProductTitle({
       {/* 3. Series / Standard Subtitle */}
       <div
         style={{
-          fontSize: 'clamp(10px, 1vw, 11px)',
+          fontSize: 'clamp(8.5px, 0.9vw, 11px)',
           fontWeight: 600,
-          letterSpacing: '1.8px',
+          letterSpacing: 'clamp(1.2px, 0.2vw, 1.8px)',
           color: '#8E857B',
           textTransform: 'uppercase',
-          marginTop: 5,
+          marginTop: 3,
         }}
       >
         {product.model}

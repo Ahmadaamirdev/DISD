@@ -20,6 +20,7 @@ export default function HeroSpecification({
   onMouseLeave,
   onClick,
   registerCardRef,
+  isMobile = false,
 }) {
   const isRevealed = revealPhase >= 3;
   const isLeft = spec.side === 'left';
@@ -63,25 +64,25 @@ export default function HeroSpecification({
               : 'translateX(-6px)'
             : 'translateX(0) translateY(0)'
           : isLeft
-          ? 'translateX(-85px)'
-          : 'translateX(85px)',
+          ? isMobile ? 'translateX(-30px)' : 'translateX(-85px)'
+          : isMobile ? 'translateX(30px)' : 'translateX(85px)',
         transition: reducedMotion
           ? 'opacity 0.3s ease'
           : isHovered || isOtherHovered
           ? 'opacity 0.25s ease, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
           : `opacity 1.35s ease ${entranceDelayMs}ms, transform 1.5s cubic-bezier(0.16, 1, 0.3, 1) ${entranceDelayMs}ms`,
-        maxWidth: 280,
+        maxWidth: isMobile ? 145 : 280,
         userSelect: 'none',
       }}
     >
       {/* 1. Simple Sequence Number */}
       <div
         style={{
-          fontSize: 11,
+          fontSize: isMobile ? 10 : 11,
           fontWeight: 800,
           letterSpacing: '2px',
           color: isHovered ? '#FFA238' : '#FF8A1A',
-          marginBottom: 4,
+          marginBottom: isMobile ? 2 : 4,
           textShadow: '0 1px 4px rgba(0, 0, 0, 0.8)',
           transition: 'color 0.25s ease',
         }}
@@ -92,14 +93,15 @@ export default function HeroSpecification({
       {/* 2. Bold High-Contrast Category Label */}
       <div
         style={{
-          fontSize: 12,
+          fontSize: isMobile ? 10 : 12,
           fontWeight: 800,
-          letterSpacing: '1.8px',
+          letterSpacing: isMobile ? '1.2px' : '1.8px',
           color: isHovered ? '#FFFFFF' : '#F5EFEA',
           textTransform: 'uppercase',
-          marginBottom: 4,
+          marginBottom: isMobile ? 2 : 4,
           textShadow: '0 1px 6px rgba(0, 0, 0, 0.9)',
           transition: 'color 0.25s ease',
+          lineHeight: 1.25,
         }}
       >
         {spec.label}
@@ -108,7 +110,7 @@ export default function HeroSpecification({
       {/* 3. Visually Dominant Primary Value + High Contrast Unit */}
       <div
         style={{
-          fontSize: 'clamp(26px, 2.6vw, 36px)',
+          fontSize: isMobile ? 'clamp(18px, 4.8vw, 22px)' : 'clamp(26px, 2.6vw, 36px)',
           fontWeight: 900,
           letterSpacing: '-0.5px',
           color: '#FFFFFF',
@@ -117,20 +119,21 @@ export default function HeroSpecification({
           display: 'flex',
           alignItems: 'baseline',
           justifyContent: isLeft ? 'flex-start' : 'flex-end',
-          gap: 8,
+          gap: isMobile ? 4 : 8,
           textShadow: '0 2px 14px rgba(0, 0, 0, 0.9), 0 0 4px rgba(0, 0, 0, 0.8)',
           transition: 'color 0.25s ease',
         }}
       >
-        <span>{spec.value}</span>
+        <span style={{ whiteSpace: 'nowrap' }}>{spec.value}</span>
         {spec.unit && (
           <span
             style={{
-              fontSize: '0.50em',
+              fontSize: isMobile ? '0.45em' : '0.50em',
               fontWeight: 700,
-              letterSpacing: '1.2px',
+              letterSpacing: '0.8px',
               color: '#FFA238',
               textTransform: 'uppercase',
+              whiteSpace: 'nowrap',
               textShadow: '0 1px 6px rgba(0, 0, 0, 0.8)',
               transition: 'color 0.25s ease',
             }}
@@ -140,8 +143,8 @@ export default function HeroSpecification({
         )}
       </div>
 
-      {/* 4. Bright, Legible Supporting Technical Description */}
-      {spec.description && (
+      {/* 4. Bright, Legible Supporting Technical Description - Desktop only */}
+      {!isMobile && spec.description && (
         <div
           style={{
             fontSize: 12,
